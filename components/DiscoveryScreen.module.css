@@ -1,0 +1,14 @@
+.screen {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.lead {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}

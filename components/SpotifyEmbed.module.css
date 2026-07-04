@@ -1,0 +1,6 @@
+.embed {
+  display: block;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+}

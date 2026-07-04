@@ -1,0 +1,26 @@
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.empty {
+  padding: var(--spacing-xl) var(--spacing-md);
+  text-align: center;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  border: 1px dashed var(--color-border);
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.emptyHint {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
