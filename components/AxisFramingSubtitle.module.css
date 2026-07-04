@@ -1,0 +1,16 @@
+.subtitle {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+.subtitleLanding {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.55;
+  max-width: 36ch;
+  margin: 0 auto;
+}

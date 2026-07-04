@@ -26,7 +26,9 @@ export function AnchorCard({ track }: AnchorCardProps) {
         aria-label={`Play preview of ${track.title}`}
         aria-pressed={isPlaying}
       >
-        <AlbumArt url={track.albumArtUrl} title={track.title} size={56} />
+        <span className={styles.artWrap}>
+          <AlbumArt url={track.albumArtUrl} title={track.title} size={80} />
+        </span>
         <span className={styles.playOverlay} aria-hidden="true">
           {isPlaying ? (
             <span className={styles.playingIcon}>

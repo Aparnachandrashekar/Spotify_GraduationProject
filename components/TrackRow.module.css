@@ -1,55 +1,98 @@
 .row {
   display: grid;
-  grid-template-columns: 36px 48px minmax(0, 1fr) 36px;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  grid-template-columns: 62px 40px 52px minmax(0, 1fr) 40px;
+  align-items: start;
+  gap: 18px;
+  padding: 18px 20px;
   border-radius: var(--radius-md);
-  transition: background-color 0.15s ease;
+  transition:
+    background-color 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+
+.rankCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.rankLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+.rankNumber {
+  font-size: 34px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.rowPlaying .rankNumber {
+  color: var(--color-primary);
 }
 
 .row:hover {
-  background: var(--color-bg-highlight);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .rowPlaying {
-  background: rgba(29, 185, 84, 0.1);
+  background: rgba(29, 185, 84, 0.12);
 }
 
 .rowPlaying:hover {
-  background: rgba(29, 185, 84, 0.14);
+  background: rgba(29, 185, 84, 0.16);
 }
 
 .playControl {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  margin-top: 2px;
   border: none;
   border-radius: 50%;
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
+  opacity: 1;
   transition:
-    color 0.15s ease,
-    background-color 0.15s ease,
-    transform 0.15s ease;
+    color 0.3s ease-out,
+    background-color 0.3s ease-out,
+    opacity 0.3s ease-out;
+}
+
+@media (min-width: 769px) {
+  .playControl {
+    opacity: 0;
+  }
+
+  .row:hover .playControl,
+  .rowPlaying .playControl {
+    opacity: 1;
+  }
 }
 
 .playControl:not(:disabled):hover {
   color: var(--color-text);
   background: var(--color-bg-highlight);
-  transform: scale(1.05);
-}
-
-.playControl:not(:disabled):hover .playIcon {
-  color: var(--color-primary);
 }
 
 .rowPlaying .playControl {
   color: var(--color-primary);
+  opacity: 1;
 }
 
 .playControl:disabled {
@@ -104,10 +147,21 @@
   background: transparent;
   cursor: pointer;
   border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
 .artButton:disabled {
   cursor: default;
+}
+
+.artButton img,
+.artButton > div {
+  transition: transform 0.3s ease-out;
+}
+
+.row:hover .artButton img,
+.row:hover .artButton > div {
+  transform: scale(1.03);
 }
 
 .metaButton {
@@ -129,12 +183,11 @@
 }
 
 .title {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .rowPlaying .title {
@@ -144,46 +197,44 @@
 .artist {
   font-size: 14px;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .reason {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-muted);
-  line-height: 1.5;
-  margin-top: var(--spacing-sm);
+  line-height: 1.6;
+  margin-top: 10px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .saveButton {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   padding: 0;
+  margin-top: 2px;
   border: none;
   border-radius: 50%;
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition:
-    color 0.15s ease,
-    background-color 0.15s ease,
-    transform 0.15s ease;
+    color 0.3s ease-out,
+    background-color 0.3s ease-out,
+    transform 0.3s ease-out;
 }
 
 .saveButton:not(:disabled):hover {
   color: var(--color-primary);
   background: rgba(29, 185, 84, 0.12);
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 
 .saveButtonActive {
@@ -193,4 +244,20 @@
 .saveButton:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: 52px 36px 48px minmax(0, 1fr) 36px;
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .rankNumber {
+    font-size: 26px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
 }

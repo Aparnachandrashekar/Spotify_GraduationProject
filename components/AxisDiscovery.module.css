@@ -1,81 +1,106 @@
+/* ── Page shell: full-width, scrolls with shell center panel ── */
 .discovery {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 44px;
+  font-family: var(--font-sans);
 }
 
-.heroHeader {
+/* ── Page header (spans both columns) ── */
+.pageHeader {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 12px;
 }
 
-.heroTitle {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.pageTitle {
+  font-size: clamp(28px, 2.8vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
   color: var(--color-text);
 }
 
-.heroSubtitle {
+.pageTitleAccent {
+  color: var(--color-primary);
+}
+
+.pageSubtitle {
   font-size: 14px;
+  font-style: italic;
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
+  max-width: 56ch;
+}
+
+/* ── Two-column grid: 38% controls | 62% results ── */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(280px, 38%) minmax(0, 62%);
+  gap: 44px;
+  align-items: start;
+}
+
+/* Left: anchor + axis — vertically centered while results scroll */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  align-self: start;
+  padding-top: 3px;
 }
 
 .changeSong {
   align-self: flex-start;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 4px 0;
   border: none;
-  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .changeSong:hover {
   color: var(--color-text);
-  background: var(--color-bg-highlight);
 }
 
-.fetchMatches {
-  align-self: flex-start;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border: none;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: #000;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.fetchMatches:hover {
-  filter: brightness(1.08);
+/* Right: results */
+.rightColumn {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .resultsArea {
   position: relative;
-  min-height: 100px;
-}
-
-.resultsLabel {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  min-height: 160px;
 }
 
 .resultsHeader {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.resultsLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.resultsAxis {
+  color: var(--color-text);
 }
 
 .playHint {
@@ -84,8 +109,22 @@
   white-space: nowrap;
 }
 
+/* Saved strip — full width below columns */
+.savedStrip {
+  width: 100%;
+}
+
+/* Axis-switch fade */
 .resultsContent {
-  animation: fadeSlideIn 0.3s ease-out;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.resultsVisible {
+  opacity: 1;
+}
+
+.resultsHidden {
+  opacity: 0;
 }
 
 .staleWrapper {
@@ -93,9 +132,9 @@
 }
 
 .staleResults {
-  opacity: 0.4;
+  opacity: 0.35;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease-out;
 }
 
 .loadingOverlay {
@@ -104,18 +143,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(18, 18, 18, 0.5);
+  background: rgba(18, 18, 18, 0.55);
   border-radius: var(--radius-md);
 }
 
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+/* Stack when the shell center panel is too narrow — not just viewport */
+@container discovery (max-width: 760px) {
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .leftColumn {
+    position: static;
+  }
+
+  .playHint {
+    display: none;
+  }
+}
+
+/* ── Mobile: single-column stack ── */
+@media (max-width: 768px) {
+  .discovery {
+    gap: 28px;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .leftColumn {
+    position: static;
+  }
+
+  .pageTitle {
+    font-size: 26px;
+  }
+
+  .playHint {
+    display: none;
   }
 }

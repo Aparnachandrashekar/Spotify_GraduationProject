@@ -8,6 +8,7 @@ import type {
   Track,
 } from "@/lib/types";
 import { getFriendlyErrorMessage } from "@/lib/errors";
+import { RECOMMEND_TIMEOUT_MS } from "@/lib/constants";
 import { trackToAnchor } from "@/lib/spotify/search";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -69,6 +70,7 @@ async function fetchRecommendations(
         anchor: anchorPayload,
         axis,
       }),
+      signal: AbortSignal.timeout(RECOMMEND_TIMEOUT_MS),
     });
 
     const data = (await response.json()) as
@@ -96,7 +98,19 @@ async function fetchRecommendations(
       recommendations: success.recommendations,
       loadedAxis: axis,
     };
-  })().finally(() => {
+  })().catch((error): FetchResult => {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return {
+        ok: false,
+        error: "Recommendations timed out. Try again in a moment.",
+      };
+    }
+
+    return {
+      ok: false,
+      error: "Failed to get recommendations.",
+    };
+  }).finally(() => {
     inflightByKey.delete(fetchKey);
   });
 
@@ -167,6 +181,9 @@ export function useRecommendations(
 
     const requestId = ++requestIdRef.current;
 
+    setRecommendations([]);
+    setLoadedAxis(null);
+    setHasFetched(false);
     setIsLoading(true);
     setError(null);
 

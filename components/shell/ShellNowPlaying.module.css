@@ -1,0 +1,170 @@
+.wrapper {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.panel {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 18px 28px;
+  background: #000000;
+  border-radius: 8px;
+  scrollbar-gutter: stable;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.collapseButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 0;
+}
+
+.collapseButton:hover {
+  color: #ffffff;
+  background: #282828;
+}
+
+.coverLive {
+  width: 100%;
+  margin-bottom: 22px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.coverLive img,
+.coverLive > div {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 20% 20%, #ff007a55, transparent 40%),
+    linear-gradient(160deg, #1a0505 0%, #2d0a0a 35%, #120612 70%, #000 100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  margin-bottom: 22px;
+}
+
+.trackMeta {
+  margin-bottom: 22px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.artist {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #b3b3b3;
+}
+
+.section {
+  margin-top: 26px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.blurb {
+  font-size: 15px;
+  line-height: 1.55;
+  color: #b3b3b3;
+}
+
+.queueList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.queueItem {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.queueThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #333, #555);
+}
+
+.queueTitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queueArtist {
+  font-size: 14px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 3px;
+}
+
+.credits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creditRow dt {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.creditRow dd {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #b3b3b3;
+  margin-top: 3px;
+}

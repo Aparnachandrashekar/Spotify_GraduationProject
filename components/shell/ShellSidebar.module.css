@@ -1,0 +1,279 @@
+.sidebar {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 14px 18px;
+  background: #000000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collapsed .panel {
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px 12px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+  min-height: 28px;
+  flex-shrink: 0;
+}
+
+.collapsedHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.collapsedIconBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.collapsedIconBtn:hover {
+  color: #ffffff;
+}
+
+button.collapsedIconBtn:hover {
+  background: #282828;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.headerIcon {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+}
+
+.headerIconButton {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+
+.headerIconButton:hover {
+  color: #ffffff;
+  background: #282828;
+}
+
+.expandedContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.filterPill {
+  padding: 8px 14px;
+  border-radius: 500px;
+  background: #282828;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.recentsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 0;
+  color: #b3b3b3;
+}
+
+.recentsSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recentsLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.listItem {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.collapsedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.collapsedListItem {
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.cover {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.coverCompact {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.coverLabel {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.coverLiked {
+  background: linear-gradient(135deg, #450af5 0%, #8e44ad 55%, #c4efd9 100%);
+}
+
+.coverMix1 {
+  background: linear-gradient(135deg, #ff6b6b, #feca57);
+}
+
+.coverMix2 {
+  background: linear-gradient(135deg, #2c3e50, #4ca1af);
+}
+
+.coverMix3 {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+.coverMix4 {
+  background: linear-gradient(135deg, #ee0979, #ff6a00);
+}
+
+.coverMix5 {
+  background: linear-gradient(135deg, #373b44, #4286f4);
+}
+
+.coverArtist1 {
+  background:
+    radial-gradient(circle at 30% 30%, #ffd1dc, transparent 55%),
+    linear-gradient(135deg, #7f7fd5, #86a8e7, #91eae4);
+}
+
+.coverArtist2 {
+  background:
+    radial-gradient(circle at 70% 20%, #ff007a, transparent 45%),
+    linear-gradient(180deg, #1a1a1a, #4a0000);
+}
+
+.meta {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 3px;
+}

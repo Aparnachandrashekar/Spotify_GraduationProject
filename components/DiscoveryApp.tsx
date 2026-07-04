@@ -3,12 +3,15 @@
 import { DiscoveryScreen } from "@/components/DiscoveryScreen";
 import { PlaybackProvider } from "@/hooks/usePlayback";
 import { SavedTracksProvider } from "@/hooks/useSavedTracks";
+import { SpotifyShell } from "@/components/shell/SpotifyShell";
 
 export function DiscoveryApp() {
   return (
     <SavedTracksProvider>
-      <PlaybackProvider>
-        <DiscoveryScreen />
+      <PlaybackProvider useShellPlayer>
+        <SpotifyShell>
+          <DiscoveryScreen />
+        </SpotifyShell>
       </PlaybackProvider>
     </SavedTracksProvider>
   );

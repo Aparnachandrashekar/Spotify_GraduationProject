@@ -32,6 +32,12 @@ export function getFriendlyErrorMessage(message: string): string {
   }
 
   if (SPOTIFY_BUSY_PATTERN.test(message)) {
+    const waitMatch = message.match(/try again in (\d+) seconds/i);
+
+    if (waitMatch) {
+      return message;
+    }
+
     return "Spotify is busy — try again in a moment.";
   }
 
@@ -68,7 +74,7 @@ export function getErrorStatus(message: string): number {
   }
 
   if (SPOTIFY_BUSY_PATTERN.test(message)) {
-    return 503;
+    return 429;
   }
 
   if (/took too long|timeout/i.test(message)) {
@@ -89,12 +95,22 @@ export function getRetryAfterSeconds(message: string, status: number): number {
     return Number.parseInt(waitMatch[1], 10);
   }
 
-  if (status === 503 || GEMINI_BUSY_PATTERN.test(message)) {
+  if (SPOTIFY_BUSY_PATTERN.test(message)) {
+    const waitMatch = message.match(/try again in (\d+) seconds/i);
+
+    if (waitMatch) {
+      return Number.parseInt(waitMatch[1], 10);
+    }
+
     return 30;
   }
 
   if (GEMINI_QUOTA_PATTERN.test(message)) {
     return 60;
+  }
+
+  if (status === 503 || GEMINI_BUSY_PATTERN.test(message)) {
+    return 30;
   }
 
   return 0;

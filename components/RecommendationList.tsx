@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { PlayableTrack, Recommendation } from "@/lib/types";
 import {
   recommendationToSavedTrack,
@@ -12,12 +13,14 @@ type RecommendationListProps = {
   recommendations: Recommendation[];
   nowPlayingId?: string | null;
   onPlay?: (track: PlayableTrack) => void;
+  animateIn?: boolean;
 };
 
 export function RecommendationList({
   recommendations,
   nowPlayingId = null,
   onPlay,
+  animateIn = false,
 }: RecommendationListProps) {
   const { isSaved, toggleSave } = useSavedTracks();
 
@@ -35,11 +38,23 @@ export function RecommendationList({
   }
 
   return (
-    <ol className={styles.list} aria-label="Recommendations">
-      {recommendations.map((item) => (
-        <li key={item.spotifyId}>
+    <ol
+      className={`${styles.list} ${animateIn ? styles.listAnimated : ""}`}
+      aria-label="Recommendations"
+    >
+      {recommendations.map((item, index) => (
+        <li
+          key={item.spotifyId}
+          className={styles.listItem}
+          style={
+            animateIn
+              ? ({ "--stagger": index } as CSSProperties)
+              : undefined
+          }
+        >
           <TrackRow
             recommendation={item}
+            rank={item.rank}
             isPlaying={item.spotifyId === nowPlayingId}
             isSaved={isSaved(item.spotifyId)}
             onPlay={onPlay}

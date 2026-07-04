@@ -104,7 +104,14 @@ export async function POST(
       );
     }
 
-    const recommendations = await enrichRecommendations(rawRecommendations);
+    const { recommendations, stats } = await enrichRecommendations(
+      rawRecommendations,
+      anchor,
+    );
+
+    console.info(
+      `[recommend] "${anchor.title}" by ${anchor.artist} (${axis}): LLM returned ${stats.llmReturned}, ${stats.survivedLookup} survived Spotify lookup, ${stats.dropped} dropped`,
+    );
 
     return NextResponse.json({ axis, recommendations });
   } catch (error) {

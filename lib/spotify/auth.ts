@@ -1,4 +1,5 @@
 import type { SpotifyTokenResponse } from "./types";
+import { logSpotifyCall } from "./logger";
 
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const REFRESH_BUFFER_MS = 60_000;
@@ -38,6 +39,7 @@ async function fetchAccessToken(): Promise<TokenCache> {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: "grant_type=client_credentials",
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {
@@ -60,6 +62,7 @@ export async function getAccessToken(): Promise<string> {
     return tokenCache.accessToken;
   }
 
+  logSpotifyCall("token", "fetching new Client Credentials token");
   tokenCache = await fetchAccessToken();
   return tokenCache.accessToken;
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import { AxisDiscovery } from "@/components/AxisDiscovery";
+import { ContentFilterPills } from "@/components/ContentFilterPills";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { LoadingState } from "@/components/LoadingState";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchResults } from "@/components/SearchResults";
 import { usePlayback } from "@/hooks/usePlayback";
 import { getFriendlyErrorMessage } from "@/lib/errors";
-import { DEFAULT_AXIS, SEARCH_DEBOUNCE_MS, SEARCH_MIN_LENGTH } from "@/lib/constants";
+import { DEFAULT_AXIS, SEARCH_DEBOUNCE_MS, SEARCH_MIN_LENGTH, SEARCH_TIMEOUT_MS } from "@/lib/constants";
 import type { ApiErrorResponse, Axis, SearchResponse, Track } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import styles from "./DiscoveryScreen.module.css";
@@ -23,55 +24,99 @@ export function DiscoveryScreen() {
   const [showResults, setShowResults] = useState(false);
 
   const searchRequestId = useRef(0);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const lastFetchedQueryRef = useRef("");
 
   useEffect(() => {
     const trimmed = query.trim();
 
     if (trimmed.length < SEARCH_MIN_LENGTH) {
+      setIsSearching(false);
       return;
     }
 
-    const timeoutId = window.setTimeout(async () => {
+    if (trimmed === lastFetchedQueryRef.current) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      searchAbortRef.current?.abort();
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
       const requestId = ++searchRequestId.current;
 
-      try {
-        const response = await fetch(
-          `/api/spotify/search?q=${encodeURIComponent(trimmed)}`,
-        );
-        const data = (await response.json()) as SearchResponse | ApiErrorResponse;
+      console.info(`[spotify] client search scheduled "${trimmed}"`);
 
-        if (requestId !== searchRequestId.current) {
-          return;
-        }
+      void (async () => {
+        const timeoutId = window.setTimeout(() => {
+          controller.abort();
+        }, SEARCH_TIMEOUT_MS);
 
-        if (!response.ok) {
-          const message =
-            "error" in data ? data.error : "Failed to search Spotify.";
+        try {
+          const response = await fetch(
+            `/api/spotify/search?q=${encodeURIComponent(trimmed)}`,
+            { signal: controller.signal },
+          );
+          const data = (await response.json()) as SearchResponse | ApiErrorResponse;
+
+          if (requestId !== searchRequestId.current) {
+            return;
+          }
+
+          if (!response.ok) {
+            const message =
+              "error" in data ? data.error : "Failed to search Spotify.";
+            setSearchResults([]);
+            setShowResults(true);
+            setError(getFriendlyErrorMessage(message));
+            return;
+          }
+
+          const success = data as SearchResponse;
+          lastFetchedQueryRef.current = trimmed;
+          setSearchResults(success.tracks);
+          setShowResults(true);
+          setError(null);
+        } catch (fetchError) {
+          if (requestId !== searchRequestId.current) {
+            return;
+          }
+
+          if (
+            fetchError instanceof DOMException &&
+            fetchError.name === "AbortError"
+          ) {
+            return;
+          }
+
           setSearchResults([]);
           setShowResults(true);
-          setError(getFriendlyErrorMessage(message));
-          return;
-        }
 
-        const success = data as SearchResponse;
-        setSearchResults(success.tracks);
-        setShowResults(true);
-        setError(null);
-      } catch {
-        if (requestId !== searchRequestId.current) {
-          return;
+          if (
+            fetchError instanceof DOMException &&
+            fetchError.name === "TimeoutError"
+          ) {
+            setError(
+              getFriendlyErrorMessage(
+                "Spotify search timed out. Check your connection and try again.",
+              ),
+            );
+            return;
+          }
+
+          setError(getFriendlyErrorMessage("Failed to search Spotify."));
+        } finally {
+          window.clearTimeout(timeoutId);
+          if (requestId === searchRequestId.current) {
+            setIsSearching(false);
+          }
         }
-        setSearchResults([]);
-        setShowResults(true);
-        setError(getFriendlyErrorMessage("Failed to search Spotify."));
-      } finally {
-        if (requestId === searchRequestId.current) {
-          setIsSearching(false);
-        }
-      }
+      })();
     }, SEARCH_DEBOUNCE_MS);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [query]);
 
   function handleQueryChange(value: string) {
@@ -79,17 +124,24 @@ export function DiscoveryScreen() {
     setError(null);
 
     if (value.trim().length < SEARCH_MIN_LENGTH) {
+      searchAbortRef.current?.abort();
+      lastFetchedQueryRef.current = "";
       setSearchResults([]);
       setShowResults(false);
       setIsSearching(false);
       return;
     }
 
-    setIsSearching(true);
+    if (value.trim() !== lastFetchedQueryRef.current) {
+      setIsSearching(true);
+    }
+
     setShowResults(true);
   }
 
   function handleSelectAnchor(track: Track) {
+    searchAbortRef.current?.abort();
+    lastFetchedQueryRef.current = "";
     setAnchor(track);
     setAxis(DEFAULT_AXIS);
     setQuery("");
@@ -105,7 +157,7 @@ export function DiscoveryScreen() {
     }
   }
 
-  function handleChangeSong() {
+  function handleReturnToLanding() {
     setAnchor(null);
     setAxis(DEFAULT_AXIS);
     setQuery("");
@@ -115,35 +167,77 @@ export function DiscoveryScreen() {
     clearPlaying();
   }
 
+  const isSearchActive = query.length > 0;
+
   return (
     <div className={styles.screen}>
-      {!anchor ? (
-        <>
-          <p className={styles.lead}>
-            Search for a song, then pick an axis to explore what &ldquo;similar&rdquo;
-            means.
-          </p>
-          <SearchBar value={query} onChange={handleQueryChange} />
-          {error ? (
-            <ErrorBanner message={error} onDismiss={() => setError(null)} />
-          ) : null}
-          {isSearching ? <LoadingState message="Searching Spotify…" /> : null}
-          {!isSearching && showResults ? (
-            <SearchResults
-              tracks={searchResults}
-              onSelectTrack={handleSelectAnchor}
+      <ContentFilterPills
+        axisActive
+        onAxisSelect={handleReturnToLanding}
+      />
+
+      <div
+        key={anchor ? `discovery-${anchor.id}` : "landing"}
+        className={styles.viewPanel}
+      >
+        {!anchor ? (
+          <div
+            className={`${styles.landing} ${isSearchActive ? styles.landingCompact : ""}`}
+          >
+            <div
+              className={`${styles.landingColumn} ${isSearchActive ? styles.landingColumnCompact : ""}`}
+            >
+              <header
+                className={`${styles.landingHeader} ${isSearchActive ? styles.landingHeaderCompact : ""}`}
+              >
+                <h1 className={styles.landingTitle}>
+                  You decide what &ldquo;similar&rdquo; means.
+                </h1>
+                <p className={styles.landingLead}>
+                  Beat, mood, or lyrics — you choose how we match. Preview and
+                  save in seconds.
+                </p>
+              </header>
+
+              <div className={styles.searchBlock}>
+                <SearchBar
+                  value={query}
+                  onChange={handleQueryChange}
+                  variant="landing"
+                />
+              </div>
+
+              {error ? (
+                <div className={styles.feedbackBlock}>
+                  <ErrorBanner message={error} onDismiss={() => setError(null)} />
+                </div>
+              ) : null}
+              {isSearching ? (
+                <div className={styles.feedbackBlock}>
+                  <LoadingState message="Searching Spotify…" />
+                </div>
+              ) : null}
+              {!isSearching && showResults ? (
+                <div className={styles.resultsBlock}>
+                  <SearchResults
+                    tracks={searchResults}
+                    onSelectTrack={handleSelectAnchor}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <div className={styles.discoveryWrap}>
+            <AxisDiscovery
+              anchor={anchor}
+              axis={axis}
+              onAxisChange={handleAxisChange}
+              onChangeSong={handleReturnToLanding}
             />
-          ) : null}
-        </>
-      ) : (
-        <AxisDiscovery
-          key={anchor.id}
-          anchor={anchor}
-          axis={axis}
-          onAxisChange={handleAxisChange}
-          onChangeSong={handleChangeSong}
-        />
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

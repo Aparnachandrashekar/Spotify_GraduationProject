@@ -2,20 +2,21 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
+  gap: var(--spacing-md);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .heading {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text);
 }
 
@@ -29,6 +30,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+  max-height: min(320px, 40vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: var(--spacing-xs);
+  scrollbar-gutter: stable;
 }
 
 .row {
@@ -128,4 +134,117 @@
 .emptyHint {
   font-size: 13px;
   color: var(--color-text-secondary);
+}
+
+/* ── Horizontal strip variant ── */
+.stripSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 28px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+}
+
+.stripHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stripEmpty {
+  padding: 20px 8px;
+}
+
+.stripList {
+  list-style: none;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
+}
+
+.stripList::-webkit-scrollbar {
+  height: 8px;
+}
+
+.stripList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+}
+
+.stripCard {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(280px, 72vw);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-highlight);
+  transition: background-color 0.25s ease-out;
+}
+
+.stripCard:hover {
+  background: #333333;
+}
+
+.stripCardPlaying {
+  background: rgba(29, 185, 84, 0.14);
+}
+
+.stripArtButton {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.stripMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.stripTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stripArtist {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+}
+
+.stripSaveButton {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.stripSaveButton:hover {
+  background: rgba(29, 185, 84, 0.12);
 }

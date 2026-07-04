@@ -1,10 +1,15 @@
 import type { Axis } from "@/lib/types";
 
-export const SEARCH_DEBOUNCE_MS = 300;
+export const SEARCH_DEBOUNCE_MS = 350;
 export const SEARCH_MIN_LENGTH = 2;
+export const SEARCH_TIMEOUT_MS = 12_000;
 export const RECOMMEND_TIMEOUT_MS = 45_000;
+export const SPOTIFY_FETCH_TIMEOUT_MS = 10_000;
 
-export const RECOMMENDATION_COUNT = 5;
+export const RECOMMENDATION_REQUEST_COUNT = 12;
+export const RECOMMENDATION_DISPLAY_COUNT = 10;
+/** @deprecated Use RECOMMENDATION_REQUEST_COUNT */
+export const RECOMMENDATION_COUNT = RECOMMENDATION_REQUEST_COUNT;
 export const DEFAULT_AXIS: Axis = "beat";
 
 export type AxisOption = {

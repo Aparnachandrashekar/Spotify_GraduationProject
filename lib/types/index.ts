@@ -25,6 +25,7 @@ export type RawRecommendation = {
 };
 
 export type Recommendation = {
+  rank: number;
   title: string;
   artist: string;
   reason: string;

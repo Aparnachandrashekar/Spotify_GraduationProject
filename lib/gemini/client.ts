@@ -1,5 +1,6 @@
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
-import { buildRecommendPrompt } from "./prompts";
+import { normalizeSongKey } from "@/lib/recommendations/keys";
+import { buildRecommendPrompt, getAxisTemperature } from "./prompts";
 import { parseRecommendations } from "./parse";
 
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
@@ -93,30 +94,19 @@ export function parseRetryAfterSeconds(message: string): number {
   return Math.ceil(Number.parseFloat(match[1]));
 }
 
-function normalizeSongKey(title: string, artist: string): string {
-  const clean = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/\([^)]*\)/g, "")
-      .replace(/\[[^\]]*\]/g, "")
-      .replace(/[^\w\s]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-  const primaryArtist = artist.split(",")[0]?.trim() ?? artist;
-
-  return `${clean(title)}|${clean(primaryArtist)}`;
+function normalizeSongKeyForFilter(title: string, artist: string): string {
+  return normalizeSongKey(title, artist);
 }
 
 export function filterAnchorAndDuplicates(
   anchor: Anchor,
   recommendations: RawRecommendation[],
 ): RawRecommendation[] {
-  const anchorKey = normalizeSongKey(anchor.title, anchor.artist);
+  const anchorKey = normalizeSongKeyForFilter(anchor.title, anchor.artist);
   const seen = new Set<string>();
 
   return recommendations.filter((item) => {
-    const key = normalizeSongKey(item.title, item.artist);
+    const key = normalizeSongKeyForFilter(item.title, item.artist);
 
     if (key === anchorKey || seen.has(key)) {
       return false;
@@ -194,6 +184,7 @@ async function callGeminiModel(
   apiKey: string,
   prompt: string,
   model: string,
+  axis: Axis,
 ): Promise<GeminiGenerateResponse> {
   let lastError = "Recommendations unavailable — try again.";
 
@@ -214,7 +205,7 @@ async function callGeminiModel(
           ],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.8,
+            temperature: getAxisTemperature(axis),
           },
         }),
       },
@@ -261,13 +252,14 @@ async function callGeminiModel(
 async function callGeminiWithFallbacks(
   apiKey: string,
   prompt: string,
+  axis: Axis,
 ): Promise<GeminiGenerateResponse> {
   const models = getModelChain();
   let lastQuotaError: ModelQuotaError | null = null;
 
   for (const model of models) {
     try {
-      return await callGeminiModel(apiKey, prompt, model);
+      return await callGeminiModel(apiKey, prompt, model, axis);
     } catch (error) {
       if (error instanceof ModelQuotaError) {
         lastQuotaError = error;
@@ -309,7 +301,7 @@ export async function getRecommendations(
   const apiKey = getApiKey();
   const prompt = buildRecommendPrompt(anchor, axis);
 
-  const data = await callGeminiWithFallbacks(apiKey, prompt);
+  const data = await callGeminiWithFallbacks(apiKey, prompt, axis);
 
   const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 

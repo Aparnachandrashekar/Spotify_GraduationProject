@@ -6,6 +6,7 @@ import styles from "./TrackRow.module.css";
 
 type TrackRowProps = {
   recommendation: Recommendation;
+  rank?: number;
   isPlaying?: boolean;
   isSaved?: boolean;
   onPlay?: (track: PlayableTrack) => void;
@@ -25,6 +26,7 @@ function toPlayable(recommendation: Recommendation): PlayableTrack {
 
 export function TrackRow({
   recommendation,
+  rank,
   isPlaying = false,
   isSaved = false,
   onPlay,
@@ -49,6 +51,13 @@ export function TrackRow({
     <article
       className={`${styles.row} ${isPlaying ? styles.rowPlaying : ""}`}
     >
+      {rank !== undefined ? (
+        <div className={styles.rankCell} aria-label={`Rank ${rank}`}>
+          <span className={styles.rankLabel}>Rank</span>
+          <span className={styles.rankNumber}>{rank}</span>
+        </div>
+      ) : null}
+
       <button
         type="button"
         className={styles.playControl}
@@ -85,6 +94,7 @@ export function TrackRow({
         <AlbumArt
           url={recommendation.albumArtUrl}
           title={recommendation.title}
+          size={52}
         />
       </button>
 
@@ -97,7 +107,12 @@ export function TrackRow({
         <div className={styles.meta}>
           <h3 className={styles.title}>{recommendation.title}</h3>
           <p className={styles.artist}>{recommendation.artist}</p>
-          <p className={styles.reason}>{recommendation.reason}</p>
+          <p
+            className={styles.reason}
+            title={recommendation.reason}
+          >
+            {recommendation.reason}
+          </p>
         </div>
       </button>
 

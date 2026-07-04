@@ -56,8 +56,10 @@ async function fetchPreviewUrl(spotifyId: string): Promise<string | null> {
 
 export function PlaybackProvider({
   children,
+  useShellPlayer = false,
 }: {
   children: React.ReactNode;
+  useShellPlayer?: boolean;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [nowPlaying, setNowPlaying] = useState<PlayableTrack | null>(null);
@@ -211,7 +213,7 @@ export function PlaybackProvider({
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
       />
-      {mounted && nowPlaying
+      {mounted && nowPlaying && !useShellPlayer
         ? createPortal(
             <PlayerBar
               track={nowPlaying}

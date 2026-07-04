@@ -1,16 +1,16 @@
 .wrapper {
   width: 100%;
-  max-width: 560px;
 }
 
 .label {
   display: block;
   margin-bottom: var(--spacing-sm);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  text-align: center;
 }
 
 .inputRow {
@@ -28,6 +28,44 @@
   border-color: var(--color-primary);
 }
 
+/* Landing hero — larger with green emphasis */
+.wrapperLanding .label {
+  margin-bottom: 14px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.wrapperLanding .inputRow {
+  padding: 0 22px;
+  border: 2px solid rgba(29, 185, 84, 0.65);
+  background: rgba(29, 185, 84, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(29, 185, 84, 0.12),
+    0 0 28px rgba(29, 185, 84, 0.14);
+  transition:
+    border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wrapperLanding .inputRow:focus-within {
+  border-color: var(--color-primary);
+  background: rgba(29, 185, 84, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(29, 185, 84, 0.25),
+    0 0 36px rgba(29, 185, 84, 0.22);
+}
+
+.wrapperLanding .icon {
+  font-size: 22px;
+  color: var(--color-primary);
+}
+
+.wrapperLanding .input {
+  padding: 20px 0;
+  font-size: 18px;
+}
+
 .icon {
   color: var(--color-text-muted);
   font-size: 18px;
@@ -43,6 +81,7 @@
   color: var(--color-text);
   font-size: 15px;
   outline: none;
+  text-align: left;
 }
 
 .input::placeholder {

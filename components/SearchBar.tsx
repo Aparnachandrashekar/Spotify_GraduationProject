@@ -6,15 +6,19 @@ type SearchBarProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  variant?: "default" | "landing";
 };
 
 export function SearchBar({
   value,
   onChange,
   placeholder = "Search for a song or artist…",
+  variant = "default",
 }: SearchBarProps) {
   return (
-    <div className={styles.wrapper}>
+    <div
+      className={`${styles.wrapper} ${variant === "landing" ? styles.wrapperLanding : ""}`}
+    >
       <label htmlFor="axis-search" className={styles.label}>
         Find your anchor song
       </label>

@@ -1,25 +1,31 @@
 import type { Axis, Anchor } from "@/lib/types";
-import { RECOMMENDATION_COUNT } from "@/lib/constants";
+import { RECOMMENDATION_REQUEST_COUNT } from "@/lib/constants";
 
 const AXIS_INSTRUCTIONS: Record<
   Axis,
-  { match: string; ignore: string; reasonHint: string }
+  { match: string; ignore: string; reasonHint: string; focus: string }
 > = {
   beat: {
     match: "tempo, rhythm, energy level, and instrumentation/production feel",
     ignore: "lyrical content and mood",
+    focus:
+      "Prioritize BPM, drum patterns, groove, and production intensity. Pick songs a DJ would call 'same energy' even if the mood or lyrics differ.",
     reasonHint:
       'Start with anchor tempo/energy assessment, then the match (e.g. "Anchor is a slow, mellow cover (~70 BPM)—matched on soft brushed drums and low energy, not the famous upbeat original.").',
   },
   mood: {
     match: "emotional feeling or atmosphere",
     ignore: "genre, tempo, and instrumentation differences",
+    focus:
+      "Prioritize how the song FEELS (lonely, euphoric, bittersweet, nostalgic). Tempo and genre may differ wildly from the anchor.",
     reasonHint:
       'e.g. "Matched on bittersweet late-night loneliness, not tempo or genre."',
   },
   lyrics: {
     match: "subject matter, themes, and storytelling",
     ignore: "musical similarity, tempo, and production",
+    focus:
+      "Prioritize narrative, metaphors, and what the song is ABOUT. The sound can be completely different from the anchor.",
     reasonHint:
       'e.g. "Matched on songs about heartbreak and moving on, not sound."',
   },
@@ -31,8 +37,18 @@ const AXIS_LABELS: Record<Axis, string> = {
   lyrics: "lyrical theme",
 };
 
+const AXIS_AVOID: Record<Axis, string> = {
+  beat: "Do NOT pick songs mainly because they share a sad/happy mood or lyrical theme — only tempo, rhythm, and energy.",
+  mood: "Do NOT pick songs mainly because they share the same BPM or production style — only emotional atmosphere.",
+  lyrics: "Do NOT pick songs mainly because they sound similar or share tempo — only lyrical subject and story.",
+};
+
 function sanitizeField(value: string): string {
   return value.replace(/[\r\n]+/g, " ").trim();
+}
+
+function usesIndicScript(value: string): boolean {
+  return /[\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0D00-\u0D7F]/.test(value);
 }
 
 function formatAnchorMetadata(anchor: Anchor): string {
@@ -50,6 +66,21 @@ function formatAnchorMetadata(anchor: Anchor): string {
   }
 
   return lines.join("\n");
+}
+
+function buildRegionalBlock(anchor: Anchor): string {
+  const text = `${anchor.title} ${anchor.artist}`;
+
+  if (!usesIndicScript(text)) {
+    return "";
+  }
+
+  return `
+REGIONAL / NON-ENGLISH ANCHOR:
+- The anchor uses a non-Latin script (e.g. Tamil, Hindi, Telugu). Recommend songs in the SAME language and scene when possible.
+- Use exact Spotify track titles (native script preferred). Only romanize if you are unsure of the official spelling.
+- Include well-known tracks from that language's film/indie/pop catalogs — not generic Western substitutes.
+- Spread artists: do not recommend the same singer more than twice.`;
 }
 
 function buildBeatAxisBlock(anchor: Anchor): string {
@@ -93,31 +124,84 @@ Reason format for beat & energy:
 - Every "reason" must reference beat/energy and must NOT recommend songs that contradict the anchor's inferred tempo/energy.`;
 }
 
+function buildMoodAxisBlock(): string {
+  return `
+CRITICAL — mood & vibe matching rules:
+- Match emotional atmosphere only. A slow ballad anchor can match an upbeat song IF the feeling is the same (e.g. both defiant).
+- Do NOT recommend songs that merely share genre or tempo with the anchor.
+- Vary eras and genres across the list — mood matches should feel surprising, not obvious playlist filler.
+- Each "reason" must name the specific emotion or vibe, not production details.`;
+}
+
+function buildLyricsAxisBlock(): string {
+  return `
+CRITICAL — lyrical theme matching rules:
+- Match subject matter, narrative arc, and themes. Production and tempo are irrelevant.
+- Include songs from different genres if the story/theme aligns.
+- Each "reason" must cite the shared lyrical theme explicitly (love, loss, ambition, partying, etc.).`;
+}
+
+function buildAxisBlock(anchor: Anchor, axis: Axis): string {
+  if (axis === "beat") {
+    return buildBeatAxisBlock(anchor);
+  }
+
+  if (axis === "mood") {
+    return buildMoodAxisBlock();
+  }
+
+  return buildLyricsAxisBlock();
+}
+
+export function getAxisTemperature(axis: Axis): number {
+  if (axis === "beat") {
+    return 0.65;
+  }
+
+  if (axis === "mood") {
+    return 0.82;
+  }
+
+  return 0.88;
+}
+
 export function buildRecommendPrompt(anchor: Anchor, axis: Axis): string {
   const rules = AXIS_INSTRUCTIONS[axis];
   const axisLabel = AXIS_LABELS[axis];
   const metadataBlock = formatAnchorMetadata(anchor);
-  const beatBlock = axis === "beat" ? buildBeatAxisBlock(anchor) : "";
+  const axisBlock = buildAxisBlock(anchor, axis);
+  const regionalBlock = buildRegionalBlock(anchor);
 
   return `You are a music expert recommending real, existing songs.
 
+ACTIVE AXIS: ${axisLabel.toUpperCase()} (id: ${axis})
+This list must be tailored ONLY to ${axisLabel}. A different axis (beat, mood, or lyrics) would produce a DIFFERENT ranked list for the same anchor.
+
 The user selected this exact anchor recording on Spotify:
 ${metadataBlock}
+${axisBlock}
+${regionalBlock}
 
 Similarity axis: ${axisLabel}
-${beatBlock}
 
-Recommend exactly ${RECOMMENDATION_COUNT} real songs that exist on major streaming platforms.
+Recommend exactly ${RECOMMENDATION_REQUEST_COUNT} real songs that exist on major streaming platforms (Spotify).
 
-For this axis, match on ${rules.match}.
-Explicitly IGNORE ${rules.ignore}.
+Rank them by similarity on ${axisLabel} ONLY — strongest match first. Position 1 is the closest match; position ${RECOMMENDATION_REQUEST_COUNT} is the weakest but still relevant.
+
+For this axis:
+- ${rules.focus}
+- Match on ${rules.match}.
+- Explicitly IGNORE ${rules.ignore}.
+- ${AXIS_AVOID[axis]}
 
 Requirements:
-- Return ONLY a JSON array. No preamble, no markdown fences, no commentary.
+- Return ONLY a JSON array in ranked order (best match first). No preamble, no markdown fences, no commentary.
 - Each item must be an object with exactly these string fields: "title", "artist", "reason".
 - "reason" must be one sentence that explicitly references the ${axisLabel} dimension (${rules.reasonHint}).
-- Do NOT include the anchor song or obvious duplicates (live/remix versions of the same track).
-- All songs must be real and well-known enough to appear on Spotify.
+- Do NOT include the anchor song or any duplicate tracks (no repeat titles, no live/remix/acoustic variants of the same song already listed).
+- Every song must be a distinct track — different title or different primary artist.
+- Avoid lazy generic picks (e.g. do not default to the same mainstream hits like "Eastside" unless they are genuinely the #1 match on THIS axis).
+- All songs must be real and findable on Spotify.
 
 Example format:
 [

@@ -1,7 +1,9 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { AXES } from "@/lib/constants";
 import type { Axis } from "@/lib/types";
+import { useMemo } from "react";
 import styles from "./AxisSelector.module.css";
 
 type AxisSelectorProps = {
@@ -11,16 +13,21 @@ type AxisSelectorProps = {
 };
 
 export function AxisSelector({ value, onChange, disabled }: AxisSelectorProps) {
-  const active = AXES.find((axis) => axis.id === value);
+  const activeIndex = useMemo(
+    () => Math.max(0, AXES.findIndex((axis) => axis.id === value)),
+    [value],
+  );
+  const active = AXES[activeIndex];
 
   return (
     <div className={styles.wrapper}>
-      <p className={styles.label}>Explore similarity by</p>
       <div
         className={styles.segmented}
         role="tablist"
         aria-label="Similarity axis"
+        style={{ "--active-index": activeIndex } as CSSProperties}
       >
+        <span className={styles.pill} aria-hidden="true" />
         {AXES.map((axis) => {
           const isActive = axis.id === value;
 
@@ -30,7 +37,7 @@ export function AxisSelector({ value, onChange, disabled }: AxisSelectorProps) {
               type="button"
               role="tab"
               aria-selected={isActive}
-              className={`${styles.segment} ${isActive ? styles.segmentActive : ""}`}
+              className={styles.segment}
               onClick={() => {
                 if (!isActive) {
                   onChange(axis.id);
@@ -44,7 +51,7 @@ export function AxisSelector({ value, onChange, disabled }: AxisSelectorProps) {
         })}
       </div>
       {active ? (
-        <p className={styles.description} role="status">
+        <p className={styles.description} key={active.id} role="status">
           {active.description}
         </p>
       ) : null}

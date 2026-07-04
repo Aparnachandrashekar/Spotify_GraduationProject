@@ -1,14 +1,241 @@
 .screen {
   width: 100%;
-  max-width: 560px;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 32px;
+  padding: 28px 32px 56px 40px;
 }
 
-.lead {
-  font-size: 15px;
-  color: var(--color-text-secondary);
+/* Filter pills stay top-left like Spotify */
+.screen > nav {
+  flex-shrink: 0;
+}
+
+.viewPanel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  animation: panelEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes panelEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  padding: 48px 0 64px;
+  transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingCompact {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px 0 24px;
+}
+
+.landingColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 52px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
   text-align: center;
-  line-height: 1.5;
+  transition: gap 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingColumnCompact {
+  gap: 20px;
+  align-items: stretch;
+}
+
+.landingHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  transition: gap 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingHeaderCompact {
+  gap: 0;
+}
+
+.landingTitle {
+  font-size: clamp(48px, 6.8vw, 76px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  max-width: 22ch;
+  background: linear-gradient(
+    100deg,
+    #1db954 0%,
+    #1ed760 14%,
+    #1db954 28%,
+    #3a3a3a 44%,
+    #4a4a4a 56%,
+    #2e2e2e 68%,
+    #1db954 82%,
+    #1ed760 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: titleFlow 9s ease-in-out infinite;
+  transition:
+    font-size 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    line-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingHeaderCompact .landingTitle {
+  font-size: clamp(22px, 2.8vw, 28px);
+  line-height: 1.15;
+  max-width: none;
+  letter-spacing: -0.02em;
+}
+
+@keyframes titleFlow {
+  0% {
+    background-position: 0% center;
+  }
+
+  50% {
+    background-position: 100% center;
+  }
+
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.landingLead {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  max-width: 38ch;
+  overflow: hidden;
+  max-height: 6em;
+  opacity: 1;
+  transition:
+    max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingHeaderCompact .landingLead {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.searchBlock {
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landingColumn:not(.landingColumnCompact) .searchBlock {
+  animation: blockFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.feedbackBlock,
+.resultsBlock {
+  width: 100%;
+  animation: blockFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes blockFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.discoveryWrap {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  container-type: inline-size;
+  container-name: discovery;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewPanel,
+  .feedbackBlock,
+  .resultsBlock {
+    animation: none;
+  }
+
+  .landing,
+  .landingColumn,
+  .landingHeader,
+  .landingTitle,
+  .landingLead,
+  .searchBlock {
+    transition: none;
+  }
+
+  .landingTitle {
+    animation: none;
+    background: none;
+    color: var(--color-primary);
+    -webkit-text-fill-color: var(--color-primary);
+  }
+}
+
+@media (max-width: 768px) {
+  .screen {
+    padding: 20px 16px 40px;
+    gap: 24px;
+  }
+
+  .landing {
+    align-items: flex-start;
+    padding: 24px 0 40px;
+  }
+
+  .landingColumn {
+    gap: 40px;
+  }
+
+  .landingHeader {
+    gap: 22px;
+  }
+
+  .landingCompact {
+    padding: 4px 0 20px;
+  }
+
+  .landingColumnCompact {
+    gap: 16px;
+  }
+
+  .landingHeaderCompact .landingTitle {
+    font-size: 20px;
+  }
 }

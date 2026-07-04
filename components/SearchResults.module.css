@@ -1,7 +1,6 @@
 .list {
   list-style: none;
   width: 100%;
-  max-width: 560px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
@@ -19,7 +18,9 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition:
+    background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    outline-color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .row:hover {
@@ -91,7 +92,6 @@
 
 .empty {
   width: 100%;
-  max-width: 560px;
   padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
   border-radius: var(--radius-md);

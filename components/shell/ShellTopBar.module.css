@@ -1,0 +1,130 @@
+.topBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  height: 64px;
+  padding: 0 16px 0 8px;
+  background: #000000;
+}
+
+.logoMark {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.topBarCollapsed {
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.topBarCollapsed .logoMark {
+  width: 76px;
+  justify-content: center;
+}
+
+.searchCluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  justify-content: center;
+  transition: justify-content 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.topBarCollapsed .searchCluster {
+  justify-content: flex-start;
+  max-width: none;
+  width: 100%;
+}
+
+.homeButton {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #282828;
+  color: #ffffff;
+}
+
+.searchPill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 500px;
+  background: #1a1a1a;
+  color: #b3b3b3;
+  transition: max-width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.topBarCollapsed .searchPill {
+  max-width: none;
+}
+
+.searchPlaceholder {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchBrowse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #b3b3b3;
+  margin-left: auto;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.installApp {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.iconButton {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .installApp {
+    display: none;
+  }
+}

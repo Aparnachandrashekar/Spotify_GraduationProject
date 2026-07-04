@@ -1,7 +1,7 @@
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
 import { AllModelsQuotaError } from "@/lib/gemini/client";
 import { filterAnchorAndDuplicates } from "@/lib/gemini/client";
-import { buildRecommendPrompt } from "@/lib/gemini/prompts";
+import { buildRecommendPrompt, getAxisTemperature } from "@/lib/gemini/prompts";
 import { parseRecommendations } from "@/lib/gemini/parse";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -96,12 +96,17 @@ Return your answer as a JSON object with a single key "recommendations" whose va
       model: getModel(),
       messages: [
         {
+          role: "system",
+          content:
+            "You are a precise music recommendation engine. Each request uses exactly one similarity axis (beat, mood, or lyrics). Lists for different axes must differ meaningfully. Return valid JSON only.",
+        },
+        {
           role: "user",
           content: prompt,
         },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.8,
+      temperature: getAxisTemperature(axis),
     }),
   });
 

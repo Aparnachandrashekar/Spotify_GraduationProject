@@ -1,5 +1,5 @@
 import type { RawRecommendation } from "@/lib/types";
-import { RECOMMENDATION_COUNT } from "@/lib/constants";
+import { RECOMMENDATION_REQUEST_COUNT } from "@/lib/constants";
 
 function stripMarkdownFences(text: string): string {
   let cleaned = text.trim();
@@ -51,7 +51,7 @@ export function parseRecommendations(rawText: string): RawRecommendation[] {
       artist: item.artist.trim(),
       reason: item.reason.trim(),
     }))
-    .slice(0, RECOMMENDATION_COUNT);
+    .slice(0, RECOMMENDATION_REQUEST_COUNT);
 
   if (recommendations.length === 0) {
     throw new Error("Couldn't read recommendations — try again.");
