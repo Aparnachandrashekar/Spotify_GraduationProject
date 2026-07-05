@@ -13,7 +13,7 @@
   --shell-sidebar-collapsed-width: 76px;
   --shell-now-playing-width: 340px;
   --panel-ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --panel-duration: 0.35s;
+  --panel-duration: 0.3s;
 
   display: grid;
   grid-template-rows: var(--shell-topbar-height) 1fr var(--shell-player-height);
@@ -42,7 +42,8 @@
   min-height: 0;
   overflow: hidden;
   transition: width var(--panel-duration) var(--panel-ease);
-  will-change: width;
+  container-type: inline-size;
+  container-name: sidebar;
 }
 
 .sidebarExpanded .sidebarSlot {
@@ -81,7 +82,6 @@
   min-height: 0;
   overflow: hidden;
   transition: width var(--panel-duration) var(--panel-ease);
-  will-change: width;
 }
 
 .nowPlayingExpanded .nowPlayingSlot {

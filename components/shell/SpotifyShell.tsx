@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePlayback } from "@/hooks/usePlayback";
 import styles from "./SpotifyShell.module.css";
 import { PanelExpandRightIcon } from "./ShellIcons";
@@ -15,62 +15,12 @@ type SpotifyShellProps = {
 
 export function SpotifyShell({ children }: SpotifyShellProps) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [sidebarContentExpanded, setSidebarContentExpanded] = useState(false);
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const { nowPlaying } = usePlayback();
-  const sidebarSlotRef = useRef<HTMLDivElement>(null);
-  const sidebarExpandedRef = useRef(sidebarExpanded);
-
-  sidebarExpandedRef.current = sidebarExpanded;
 
   const toggleSidebar = useCallback(() => {
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (sidebarExpanded) {
-      setSidebarContentExpanded(false);
-      setSidebarExpanded(false);
-      return;
-    }
-
-    setSidebarExpanded(true);
-
-    if (reducedMotion) {
-      setSidebarContentExpanded(true);
-      return;
-    }
-
-    setSidebarContentExpanded(false);
-  }, [sidebarExpanded]);
-
-  useEffect(() => {
-    const slot = sidebarSlotRef.current;
-
-    if (!slot) {
-      return;
-    }
-
-    function handleTransitionEnd(event: TransitionEvent) {
-      if (event.target !== slot || event.propertyName !== "width") {
-        return;
-      }
-
-      setSidebarContentExpanded(sidebarExpandedRef.current);
-    }
-
-    slot.addEventListener("transitionend", handleTransitionEnd);
-
-    return () => {
-      slot.removeEventListener("transitionend", handleTransitionEnd);
-    };
+    setSidebarExpanded((value) => !value);
   }, []);
-
-  useEffect(() => {
-    if (!sidebarExpanded) {
-      setSidebarContentExpanded(false);
-    }
-  }, [sidebarExpanded]);
 
   useEffect(() => {
     if (nowPlaying) {
@@ -91,9 +41,9 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
       <ShellTopBar panelsCollapsed={panelsCollapsed} />
 
       <div className={bodyClassName}>
-        <div ref={sidebarSlotRef} className={styles.sidebarSlot}>
+        <div className={styles.sidebarSlot}>
           <ShellSidebar
-            layout={sidebarContentExpanded ? "expanded" : "collapsed"}
+            layout={sidebarExpanded ? "expanded" : "collapsed"}
             onToggle={toggleSidebar}
           />
         </div>

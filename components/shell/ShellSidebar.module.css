@@ -17,7 +17,6 @@
   border-radius: 8px;
   overflow: hidden;
   box-sizing: border-box;
-  transition: padding var(--panel-duration, 0.35s) ease;
 }
 
 .layoutCollapsed .panel {
@@ -26,49 +25,53 @@
   padding: 14px 10px 16px;
 }
 
+/* Hidden layers must not reserve space */
 .expandedOnly,
 .collapsedOnly {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  display: none;
 }
 
 .layoutExpanded .expandedHeader.expandedOnly {
   display: flex;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
 .layoutExpanded .expandedContent.expandedOnly {
   display: flex;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
 .layoutExpanded .meta.expandedOnly {
   display: block;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
-.layoutCollapsed .expandedOnly {
+.layoutExpanded .collapsedOnly {
   display: none;
-  opacity: 0;
-  visibility: hidden;
 }
 
 .layoutCollapsed .collapsedOnly {
   display: flex;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
 .layoutCollapsed .collapsedHeader.collapsedOnly {
   flex-direction: column;
+}
+
+.layoutCollapsed .expandedOnly {
+  display: none;
+}
+
+/* During width animation, keep icon rail until the slot is wide enough */
+@container sidebar (max-width: 280px) {
+  .layoutExpanded .expandedOnly {
+    display: none;
+  }
+
+  .layoutExpanded .collapsedOnly {
+    display: flex;
+  }
+
+  .layoutExpanded .collapsedHeader.collapsedOnly {
+    flex-direction: column;
+  }
 }
 
 .headerArea {
@@ -309,10 +312,4 @@ button.collapsedIconBtn:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel {
-    transition: none;
-  }
 }
