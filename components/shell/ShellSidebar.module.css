@@ -4,6 +4,12 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.railPinned {
+  justify-content: flex-start;
 }
 
 .panel {
@@ -12,7 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 14px 14px 18px;
+  padding: 14px 12px 18px;
   background: #000000;
   border-radius: 8px;
   overflow: hidden;
@@ -21,8 +27,12 @@
 
 .layoutCollapsed .panel {
   align-items: center;
-  gap: 14px;
-  padding: 14px 10px 16px;
+}
+
+.railPinned .panel {
+  width: 76px;
+  min-width: 76px;
+  flex-shrink: 0;
 }
 
 /* Hidden layers must not reserve space */
@@ -33,14 +43,24 @@
 
 .layoutExpanded .expandedHeader.expandedOnly {
   display: flex;
+  opacity: 0;
 }
 
 .layoutExpanded .expandedContent.expandedOnly {
   display: flex;
+  opacity: 0;
 }
 
 .layoutExpanded .meta.expandedOnly {
   display: block;
+  opacity: 0;
+}
+
+.layoutExpanded.revealed .expandedHeader.expandedOnly,
+.layoutExpanded.revealed .expandedContent.expandedOnly,
+.layoutExpanded.revealed .meta.expandedOnly {
+  opacity: 1;
+  transition: opacity 0.22s ease-out;
 }
 
 .layoutExpanded .collapsedOnly {
@@ -57,21 +77,6 @@
 
 .layoutCollapsed .expandedOnly {
   display: none;
-}
-
-/* During width animation, keep icon rail until the slot is wide enough */
-@container sidebar (max-width: 280px) {
-  .layoutExpanded .expandedOnly {
-    display: none;
-  }
-
-  .layoutExpanded .collapsedOnly {
-    display: flex;
-  }
-
-  .layoutExpanded .collapsedHeader.collapsedOnly {
-    flex-direction: column;
-  }
 }
 
 .headerArea {
@@ -312,4 +317,13 @@ button.collapsedIconBtn:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layoutExpanded.revealed .expandedHeader.expandedOnly,
+  .layoutExpanded.revealed .expandedContent.expandedOnly,
+  .layoutExpanded.revealed .meta.expandedOnly {
+    transition: none;
+    opacity: 1;
+  }
 }

@@ -72,15 +72,26 @@ const RAIL_ICON = 26;
 
 type ShellSidebarProps = {
   layout: "collapsed" | "expanded";
+  revealed?: boolean;
   onToggle: () => void;
 };
 
-export function ShellSidebar({ layout, onToggle }: ShellSidebarProps) {
+export function ShellSidebar({
+  layout,
+  revealed = false,
+  onToggle,
+}: ShellSidebarProps) {
   const expanded = layout === "expanded";
+  const railPinned = !expanded;
 
   return (
     <aside
-      className={`${styles.sidebar} ${expanded ? styles.layoutExpanded : styles.layoutCollapsed}`}
+      className={[
+        styles.sidebar,
+        expanded ? styles.layoutExpanded : styles.layoutCollapsed,
+        revealed ? styles.revealed : "",
+        railPinned ? styles.railPinned : "",
+      ].join(" ")}
       aria-hidden="true"
     >
       <div className={styles.panel}>
