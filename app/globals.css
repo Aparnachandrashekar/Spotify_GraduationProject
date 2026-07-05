@@ -81,3 +81,14 @@ a:focus-visible {
   background: rgba(29, 185, 84, 0.35);
   color: var(--color-text);
 }
+
+@media (max-width: 768px) {
+  .app-body {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

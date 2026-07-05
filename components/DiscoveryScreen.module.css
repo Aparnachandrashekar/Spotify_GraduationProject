@@ -212,32 +212,48 @@
 
 @media (max-width: 768px) {
   .screen {
-    padding: 20px 20px 40px;
-    gap: 24px;
+    padding: 16px 12px 28px;
+    gap: 20px;
   }
 
   .landing {
     align-items: flex-start;
-    padding: 24px 0 40px;
+    padding: 16px 0 32px;
   }
 
   .landingColumn {
-    gap: 40px;
+    gap: 32px;
   }
 
   .landingHeader {
-    gap: 22px;
+    gap: 18px;
+  }
+
+  .landingTitle {
+    font-size: clamp(32px, 9vw, 44px);
+    max-width: none;
   }
 
   .landingCompact {
-    padding: 4px 0 20px;
+    padding: 4px 0 16px;
   }
 
   .landingColumnCompact {
-    gap: 16px;
+    gap: 14px;
   }
 
   .landingHeaderCompact .landingTitle {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .screen {
+    padding: 12px 10px 24px;
+    gap: 16px;
+  }
+
+  .landingTitle {
+    font-size: clamp(28px, 8.5vw, 36px);
   }
 }

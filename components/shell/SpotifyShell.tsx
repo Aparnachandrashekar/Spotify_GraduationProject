@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePlayback } from "@/hooks/usePlayback";
 import styles from "./SpotifyShell.module.css";
 import { PanelExpandRightIcon } from "./ShellIcons";
@@ -16,6 +17,7 @@ type SpotifyShellProps = {
 };
 
 export function SpotifyShell({ children }: SpotifyShellProps) {
+  const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarContentExpanded, setSidebarContentExpanded] = useState(false);
   const [sidebarRevealed, setSidebarRevealed] = useState(false);
@@ -26,6 +28,12 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
   const sidebarTimerRef = useRef<number | null>(null);
 
   sidebarOpenRef.current = sidebarOpen;
+
+  const closeSidebar = useCallback(() => {
+    setSidebarRevealed(false);
+    setSidebarContentExpanded(false);
+    setSidebarOpen(false);
+  }, []);
 
   const finishSidebarOpen = useCallback(() => {
     if (!sidebarOpenRef.current) {
@@ -46,22 +54,25 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
   }, []);
 
   const toggleSidebar = useCallback(() => {
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
     clearSidebarTimer();
 
     if (sidebarOpen) {
-      setSidebarRevealed(false);
-      setSidebarContentExpanded(false);
-      setSidebarOpen(false);
+      closeSidebar();
       return;
     }
 
     setSidebarRevealed(false);
     setSidebarContentExpanded(false);
     setSidebarOpen(true);
+
+    if (isMobile) {
+      finishSidebarOpen();
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     if (reducedMotion) {
       finishSidebarOpen();
@@ -72,9 +83,13 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
       sidebarTimerRef.current = null;
       finishSidebarOpen();
     }, SIDEBAR_ANIM_MS);
-  }, [clearSidebarTimer, finishSidebarOpen, sidebarOpen]);
+  }, [clearSidebarTimer, closeSidebar, finishSidebarOpen, isMobile, sidebarOpen]);
 
   useEffect(() => {
+    if (isMobile) {
+      return;
+    }
+
     const slot = sidebarSlotRef.current;
 
     if (!slot) {
@@ -101,13 +116,26 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
       slot.removeEventListener("transitionend", handleTransitionEnd);
       clearSidebarTimer();
     };
-  }, [clearSidebarTimer, finishSidebarOpen]);
+  }, [clearSidebarTimer, finishSidebarOpen, isMobile]);
 
   useEffect(() => {
     if (nowPlaying) {
       setNowPlayingOpen(true);
     }
   }, [nowPlaying?.spotifyId, nowPlaying]);
+
+  useEffect(() => {
+    if (!isMobile || !sidebarOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobile, sidebarOpen]);
 
   const panelsCollapsed = !sidebarOpen && !nowPlayingOpen;
 
@@ -119,7 +147,20 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
 
   return (
     <div className={styles.shell} aria-label="Spotify shell">
-      <ShellTopBar panelsCollapsed={panelsCollapsed} />
+      <ShellTopBar
+        panelsCollapsed={panelsCollapsed}
+        onOpenLibrary={toggleSidebar}
+        libraryOpen={sidebarOpen}
+      />
+
+      {isMobile && sidebarOpen ? (
+        <button
+          type="button"
+          className={styles.mobileBackdrop}
+          aria-label="Close library"
+          onClick={closeSidebar}
+        />
+      ) : null}
 
       <div className={bodyClassName}>
         <div ref={sidebarSlotRef} className={styles.sidebarSlot}>

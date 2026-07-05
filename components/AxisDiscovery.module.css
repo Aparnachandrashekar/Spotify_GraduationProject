@@ -207,3 +207,25 @@
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .discovery {
+    gap: 22px;
+  }
+
+  .pageTitle {
+    font-size: 22px;
+  }
+
+  .pageSubtitle {
+    font-size: 13px;
+  }
+
+  .columns {
+    gap: 22px;
+  }
+
+  .changeSong {
+    font-size: 13px;
+  }
+}

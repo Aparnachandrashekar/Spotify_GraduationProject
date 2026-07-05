@@ -209,3 +209,63 @@
     order: -1;
   }
 }
+
+@media (max-width: 768px) {
+  .playerBar {
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 10px;
+  }
+
+  .left {
+    gap: 10px;
+  }
+
+  .thumb,
+  .thumbLive {
+    width: 48px;
+    height: 48px;
+  }
+
+  .thumbLive img,
+  .thumbLive > div {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .trackTitle {
+    font-size: 14px;
+  }
+
+  .trackArtist {
+    font-size: 13px;
+  }
+
+  .controls {
+    gap: 14px;
+  }
+
+  .controls .control:first-child,
+  .controls .control:last-child {
+    display: none;
+  }
+
+  .control {
+    width: 34px;
+    height: 34px;
+  }
+
+  .controlPlay {
+    width: 36px;
+    height: 36px;
+  }
+
+  .progress {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .likeButton {
+    width: 32px;
+    height: 32px;
+  }
+}

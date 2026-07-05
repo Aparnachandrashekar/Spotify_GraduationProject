@@ -281,3 +281,28 @@
     -webkit-line-clamp: 2;
   }
 }
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 36px 40px minmax(0, 1fr) 32px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .rankCell {
+    display: none;
+  }
+
+  .rankNumber {
+    font-size: 20px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .reason {
+    font-size: 13px;
+    -webkit-line-clamp: 2;
+  }
+}

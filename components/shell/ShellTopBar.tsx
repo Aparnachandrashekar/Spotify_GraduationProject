@@ -1,12 +1,23 @@
 import Image from "next/image";
-import { BellIcon, HomeIcon, LibraryBrowseIcon, SearchIcon } from "./ShellIcons";
+import {
+  BellIcon,
+  HomeIcon,
+  LibraryBrowseIcon,
+  SearchIcon,
+} from "./ShellIcons";
 import styles from "./ShellTopBar.module.css";
 
 type ShellTopBarProps = {
   panelsCollapsed?: boolean;
+  onOpenLibrary?: () => void;
+  libraryOpen?: boolean;
 };
 
-export function ShellTopBar({ panelsCollapsed = false }: ShellTopBarProps) {
+export function ShellTopBar({
+  panelsCollapsed = false,
+  onOpenLibrary,
+  libraryOpen = false,
+}: ShellTopBarProps) {
   return (
     <header
       className={`${styles.topBar} ${panelsCollapsed ? styles.topBarCollapsed : ""}`}
@@ -21,6 +32,16 @@ export function ShellTopBar({ panelsCollapsed = false }: ShellTopBarProps) {
           priority
         />
       </div>
+
+      <button
+        type="button"
+        className={`${styles.mobileLibraryBtn} ${libraryOpen ? styles.mobileLibraryBtnActive : ""}`}
+        aria-label="Your library"
+        aria-expanded={libraryOpen}
+        onClick={onOpenLibrary}
+      >
+        <LibraryBrowseIcon size={24} />
+      </button>
 
       <div className={styles.searchCluster}>
         <div className={styles.homeButton}>

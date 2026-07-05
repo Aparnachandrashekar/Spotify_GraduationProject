@@ -91,3 +91,19 @@
 .input::-webkit-search-cancel-button {
   filter: invert(1);
 }
+
+@media (max-width: 768px) {
+  .wrapperLanding .inputRow {
+    padding: 0 16px;
+  }
+
+  .wrapperLanding .input {
+    padding: 16px 0;
+    font-size: 16px;
+  }
+
+  .wrapperLanding .label {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+}

@@ -248,3 +248,18 @@
 .stripSaveButton:hover {
   background: rgba(29, 185, 84, 0.12);
 }
+
+@media (max-width: 768px) {
+  .section {
+    padding: 16px;
+  }
+
+  .stripSection {
+    padding: 16px;
+  }
+
+  .stripCard {
+    width: min(260px, 78vw);
+    padding: 10px 12px;
+  }
+}

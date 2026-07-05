@@ -319,6 +319,27 @@ button.collapsedIconBtn:hover {
   margin-top: 3px;
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    justify-content: stretch;
+  }
+
+  .railPinned .panel,
+  .layoutCollapsed .panel,
+  .layoutExpanded .panel {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .layoutExpanded.revealed .expandedHeader.expandedOnly,
+  .layoutExpanded.revealed .expandedContent.expandedOnly,
+  .layoutExpanded.revealed .meta.expandedOnly {
+    transition: none;
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .layoutExpanded.revealed .expandedHeader.expandedOnly,
   .layoutExpanded.revealed .expandedContent.expandedOnly,

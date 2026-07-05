@@ -35,3 +35,18 @@
   background: #ffffff;
   color: #000000;
 }
+
+@media (max-width: 768px) {
+  .nav {
+    gap: 8px;
+  }
+
+  .pill:not(.pillButton) {
+    display: none;
+  }
+
+  .pillButton {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
