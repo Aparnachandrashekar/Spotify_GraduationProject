@@ -140,7 +140,7 @@ LANGUAGE CONSTRAINT (apply while matching the axis above):
 - Candidates must be from that scene on Spotify — but rank by ${axis} fit first, language second.
 - Do NOT recommend English-language Western pop/rock/indie songs unless the anchor itself is Western English.
 - Use exact Spotify track titles (native script when applicable).
-- Do not substitute songs from other Indian languages (e.g. no Hindi picks for a Tamil anchor).${strictNote}`;
+- Do not substitute songs from other Indian languages — zero Hindi/Bollywood songs for Tamil anchors, zero Tamil/Kollywood songs for Hindi anchors.${strictNote}`;
 }
 
 function buildBeatAxisBlock(anchor: Anchor): string {

@@ -9,6 +9,10 @@ import {
 } from "@/lib/gemini/recommend-cache";
 import { rerankRecommendationsByInference } from "@/lib/recommendations/inference-rank";
 import { rerankRecommendationsByAudio } from "@/lib/recommendations/audio-rank";
+import {
+  detectAnchorScene,
+  isRecommendationMatchForScene,
+} from "@/lib/music/anchor-scene";
 import { resolveAnchorAudioProfile } from "@/lib/spotify/anchor-profile";
 import { assertSpotifyConfigured } from "@/lib/spotify/auth";
 import { enrichRecommendations } from "@/lib/spotify/enrich";
@@ -141,11 +145,28 @@ export async function POST(
         )
       : rankedByInference;
 
+    const scene = detectAnchorScene(anchor);
+    const languageSafeRecommendations = scene
+      ? rankedRecommendations.filter((item) =>
+          isRecommendationMatchForScene(
+            { title: item.title, artist: item.artist },
+            scene,
+          ),
+        )
+      : rankedRecommendations;
+
+    const finalRecommendations = languageSafeRecommendations.map(
+      (item, index) => ({
+        ...item,
+        rank: index + 1,
+      }),
+    );
+
     console.info(
       `[recommend] "${anchor.title}" by ${anchor.artist} (${axis}): LLM returned ${stats.llmReturned}, ${stats.survivedLookup} survived Spotify lookup, ${stats.dropped} dropped`,
     );
 
-    return NextResponse.json({ axis, recommendations: rankedRecommendations });
+    return NextResponse.json({ axis, recommendations: finalRecommendations });
   } catch (error) {
     if (error instanceof AllModelsQuotaError) {
       return NextResponse.json(

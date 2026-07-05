@@ -6,7 +6,7 @@ type CacheEntry = {
 };
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const CACHE_VERSION = "vibe-v2";
+const CACHE_VERSION = "lang-strict-v1";
 const cache = new Map<string, CacheEntry>();
 
 function cacheKey(
