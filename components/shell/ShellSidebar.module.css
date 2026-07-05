@@ -30,12 +30,20 @@
   display: none;
 }
 
-.layoutExpanded .expandedOnly {
+.layoutExpanded .expandedHeader.expandedOnly {
+  display: flex;
+}
+
+.layoutExpanded .expandedContent.expandedOnly {
+  display: flex;
+}
+
+.layoutExpanded .meta.expandedOnly {
   display: block;
 }
 
-.layoutExpanded .expandedHeader.expandedOnly {
-  display: flex;
+.layoutCollapsed .expandedOnly {
+  display: none;
 }
 
 .layoutCollapsed .collapsedOnly {
@@ -135,7 +143,6 @@ button.collapsedIconBtn:hover {
 }
 
 .expandedContent {
-  display: flex;
   flex-direction: column;
   gap: 14px;
   width: 100%;

@@ -34,7 +34,7 @@
   min-height: 0;
   overflow: hidden;
   gap: 8px;
-  padding: 0 8px 8px;
+  padding: 0 12px 12px;
   position: relative;
   transition: grid-template-columns var(--panel-duration) var(--panel-ease);
 }
