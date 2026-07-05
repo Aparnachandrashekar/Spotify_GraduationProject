@@ -1,10 +1,12 @@
 .screen {
   width: 100%;
+  max-width: 100%;
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding: 28px 32px 56px 40px;
+  gap: 28px;
+  padding: 24px 56px 48px 28px;
+  box-sizing: border-box;
 }
 
 /* Filter pills stay top-left like Spotify */
@@ -210,7 +212,7 @@
 
 @media (max-width: 768px) {
   .screen {
-    padding: 20px 16px 40px;
+    padding: 20px 20px 40px;
     gap: 24px;
   }
 

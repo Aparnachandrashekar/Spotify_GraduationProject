@@ -96,7 +96,7 @@ async function fetchRecommendations(
     return {
       ok: true,
       recommendations: success.recommendations,
-      loadedAxis: axis,
+      loadedAxis: success.axis,
     };
   })().catch((error): FetchResult => {
     if (error instanceof DOMException && error.name === "TimeoutError") {

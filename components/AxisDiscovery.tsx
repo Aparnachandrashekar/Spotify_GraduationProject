@@ -73,6 +73,15 @@ export function AxisDiscovery({
   return (
     <section className={styles.discovery} aria-label="Axis discovery">
       <header className={styles.pageHeader}>
+        <div className={styles.pageHeaderTop}>
+          <button
+            type="button"
+            className={styles.changeSong}
+            onClick={onChangeSong}
+          >
+            ← Change song
+          </button>
+        </div>
         <h1 className={styles.pageTitle}>
           You decide the <span className={styles.pageTitleAccent}>Vibe</span>.
         </h1>
@@ -84,14 +93,6 @@ export function AxisDiscovery({
 
       <div className={styles.columns}>
         <aside className={styles.leftColumn}>
-          <button
-            type="button"
-            className={styles.changeSong}
-            onClick={onChangeSong}
-          >
-            ← Change song
-          </button>
-
           <AnchorCard track={anchor} />
 
           <AxisSelector

@@ -1,9 +1,10 @@
 /* ── Page shell: full-width, scrolls with shell center panel ── */
 .discovery {
   width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 44px;
+  gap: 36px;
   font-family: var(--font-sans);
 }
 
@@ -11,7 +12,14 @@
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  padding-right: 48px;
+}
+
+.pageHeaderTop {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
 }
 
 .pageTitle {
@@ -34,28 +42,7 @@
   max-width: 56ch;
 }
 
-/* ── Two-column grid: 38% controls | 62% results ── */
-.columns {
-  display: grid;
-  grid-template-columns: minmax(280px, 38%) minmax(0, 62%);
-  gap: 44px;
-  align-items: start;
-}
-
-/* Left: anchor + axis — vertically centered while results scroll */
-.leftColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  position: sticky;
-  top: 50%;
-  transform: translateY(-50%);
-  align-self: start;
-  padding-top: 3px;
-}
-
 .changeSong {
-  align-self: flex-start;
   padding: 4px 0;
   border: none;
   background: transparent;
@@ -63,11 +50,30 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.2s ease-out;
 }
 
 .changeSong:hover {
   color: var(--color-text);
+}
+
+/* ── Two-column grid: fixed max left, fluid right ── */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 40px);
+  align-items: start;
+}
+
+/* Left: anchor + axis — sticks below header while results scroll */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+  align-self: start;
 }
 
 /* Right: results */
@@ -76,18 +82,22 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  container-type: inline-size;
+  container-name: results;
 }
 
 .resultsArea {
   position: relative;
   min-height: 160px;
+  min-width: 0;
 }
 
 .resultsHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px 16px;
   margin-bottom: 20px;
 }
 
@@ -112,6 +122,7 @@
 /* Saved strip — full width below columns */
 .savedStrip {
   width: 100%;
+  min-width: 0;
 }
 
 /* Axis-switch fade */
@@ -147,8 +158,14 @@
   border-radius: var(--radius-md);
 }
 
-/* Stack when the shell center panel is too narrow — not just viewport */
-@container discovery (max-width: 760px) {
+@container results (max-width: 480px) {
+  .playHint {
+    display: none;
+  }
+}
+
+/* Stack when the shell center panel is too narrow */
+@container discovery (max-width: 720px) {
   .columns {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -158,8 +175,8 @@
     position: static;
   }
 
-  .playHint {
-    display: none;
+  .pageHeader {
+    padding-right: 0;
   }
 }
 
@@ -180,6 +197,10 @@
 
   .pageTitle {
     font-size: 26px;
+  }
+
+  .pageHeader {
+    padding-right: 0;
   }
 
   .playHint {

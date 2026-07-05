@@ -4,7 +4,7 @@
   align-items: center;
   gap: 8px;
   height: 64px;
-  padding: 0 16px 0 8px;
+  padding: 0 8px;
   background: #000000;
   transition: grid-template-columns var(--panel-duration, 0.4s) ease-in-out;
 }

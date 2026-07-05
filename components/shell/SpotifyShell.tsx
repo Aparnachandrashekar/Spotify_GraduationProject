@@ -35,11 +35,9 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
     clearSidebarTimer();
 
     if (sidebarOpen) {
+      // Switch to icon rail immediately so expanded content never squishes in a narrow column.
+      setSidebarLayout("collapsed");
       setSidebarOpen(false);
-      sidebarTimerRef.current = window.setTimeout(() => {
-        setSidebarLayout("collapsed");
-        sidebarTimerRef.current = null;
-      }, PANEL_MS);
       return;
     }
 
@@ -53,6 +51,12 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
   useEffect(() => {
     return () => clearSidebarTimer();
   }, [clearSidebarTimer]);
+
+  useEffect(() => {
+    if (!sidebarOpen && sidebarLayout === "expanded") {
+      setSidebarLayout("collapsed");
+    }
+  }, [sidebarOpen, sidebarLayout]);
 
   useEffect(() => {
     if (nowPlaying) {
@@ -74,29 +78,38 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
 
       <div className={bodyClassName}>
         <div className={styles.sidebarSlot}>
-          <ShellSidebar layout={sidebarLayout} onToggle={toggleSidebar} />
+          <ShellSidebar
+            layout={
+              sidebarOpen && sidebarLayout === "expanded"
+                ? "expanded"
+                : "collapsed"
+            }
+            onToggle={toggleSidebar}
+          />
         </div>
 
-        <main className={styles.center} aria-label="Main content">
-          {children}
-        </main>
+        <div className={styles.centerWrap}>
+          <main className={styles.center} aria-label="Main content">
+            {children}
+          </main>
+
+          <button
+            type="button"
+            className={`${styles.nowPlayingExpandTab} ${nowPlayingOpen ? styles.nowPlayingExpandTabHidden : ""}`}
+            aria-label="Show now playing panel"
+            aria-hidden={nowPlayingOpen}
+            tabIndex={nowPlayingOpen ? -1 : 0}
+            onClick={() => setNowPlayingOpen(true)}
+          >
+            <PanelExpandRightIcon size={26} />
+          </button>
+        </div>
 
         <div className={styles.nowPlayingSlot}>
           <ShellNowPlaying
             onCollapse={() => setNowPlayingOpen(false)}
           />
         </div>
-
-        <button
-          type="button"
-          className={`${styles.nowPlayingExpandTab} ${nowPlayingOpen ? styles.nowPlayingExpandTabHidden : ""}`}
-          aria-label="Show now playing panel"
-          aria-hidden={nowPlayingOpen}
-          tabIndex={nowPlayingOpen ? -1 : 0}
-          onClick={() => setNowPlayingOpen(true)}
-        >
-          <PanelExpandRightIcon size={26} />
-        </button>
       </div>
 
       <ShellPlayerBar />
