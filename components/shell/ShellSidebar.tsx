@@ -71,14 +71,16 @@ const FILTER_PILLS = ["Playlists", "Artists", "Albums", "Podcasts"];
 const RAIL_ICON = 26;
 
 type ShellSidebarProps = {
-  expanded: boolean;
+  layout: "collapsed" | "expanded";
   onToggle: () => void;
 };
 
-export function ShellSidebar({ expanded, onToggle }: ShellSidebarProps) {
+export function ShellSidebar({ layout, onToggle }: ShellSidebarProps) {
+  const expanded = layout === "expanded";
+
   return (
     <aside
-      className={`${styles.sidebar} ${expanded ? styles.expanded : styles.collapsed}`}
+      className={`${styles.sidebar} ${expanded ? styles.layoutExpanded : styles.layoutCollapsed}`}
       aria-hidden="true"
     >
       <div className={styles.panel}>

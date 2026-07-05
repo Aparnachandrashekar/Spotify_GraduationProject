@@ -1,6 +1,8 @@
 .wrapper {
-  min-height: 0;
+  width: 340px;
+  min-width: 340px;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 

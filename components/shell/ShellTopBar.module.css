@@ -1,29 +1,20 @@
 .topBar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   height: 64px;
   padding: 0 16px 0 8px;
   background: #000000;
+  transition: grid-template-columns var(--panel-duration, 0.4s) ease-in-out;
 }
 
 .logoMark {
-  width: 48px;
+  width: 76px;
   height: 48px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.topBarCollapsed {
-  grid-template-columns: 76px minmax(0, 1fr) auto;
-  gap: 8px;
-}
-
-.topBarCollapsed .logoMark {
-  width: 76px;
   justify-content: center;
 }
 

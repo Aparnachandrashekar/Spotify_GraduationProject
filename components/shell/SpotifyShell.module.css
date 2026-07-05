@@ -12,7 +12,7 @@
   --shell-sidebar-width: 332px;
   --shell-sidebar-collapsed-width: 76px;
   --shell-now-playing-width: 340px;
-  --panel-ease: ease-in-out;
+  --panel-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --panel-duration: 0.4s;
 
   display: grid;
@@ -55,6 +55,12 @@
   --shell-now-playing-width: 0px;
 }
 
+.sidebarSlot {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .center {
   min-width: 0;
   min-height: 0;
@@ -77,14 +83,6 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--panel-duration) var(--panel-ease);
-}
-
-.nowPlayingExpanded .nowPlayingSlot {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .nowPlayingExpandTab {
@@ -121,8 +119,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .body,
-  .center,
-  .nowPlayingSlot,
   .nowPlayingExpandTab {
     transition: none;
   }
