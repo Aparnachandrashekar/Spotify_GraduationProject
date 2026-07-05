@@ -80,9 +80,10 @@ function parseRetryAfterSeconds(headers: Headers): number {
 export async function getGroqRecommendations(
   anchor: Anchor,
   axis: Axis,
+  options?: { strictScene?: boolean },
 ): Promise<RawRecommendation[]> {
   const apiKey = getApiKey();
-  const prompt = `${buildRecommendPrompt(anchor, axis)}
+  const prompt = `${buildRecommendPrompt(anchor, axis, options)}
 
 Return your answer as a JSON object with a single key "recommendations" whose value is the array of song objects.`;
 
@@ -98,7 +99,7 @@ Return your answer as a JSON object with a single key "recommendations" whose va
         {
           role: "system",
           content:
-            "You are a precise music recommendation engine. Each request uses exactly one similarity axis (beat, mood, or lyrics). Lists for different axes must differ meaningfully. Return valid JSON only.",
+            "You are a precise music recommendation engine. Each request uses exactly one similarity axis (beat, mood, or lyrics). Lists for different axes must differ meaningfully. For Indian/Tamil/Hindi/Telugu anchors, recommend only songs from that same language and industry — never substitute Western English hits. Return valid JSON only.",
         },
         {
           role: "user",

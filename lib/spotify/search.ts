@@ -1,4 +1,5 @@
 import { SPOTIFY_FETCH_TIMEOUT_MS } from "@/lib/constants";
+import { isIndianAnchor } from "@/lib/music/anchor-scene";
 import type { Anchor, Track } from "@/lib/types";
 import { normalizeSongKey } from "@/lib/recommendations/keys";
 import { pickAlbumArtUrl } from "./images";
@@ -54,7 +55,15 @@ function withMarket(params: URLSearchParams, market?: string): URLSearchParams {
 }
 
 function usesIndicScript(value: string): boolean {
-  return /[\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0D00-\u0D7F]/.test(value);
+  return /[\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0D00-\u0D7F\u0A00-\u0A7F]/.test(value);
+}
+
+function shouldUseIndianMarkets(title: string, artist: string, albumName?: string | null): boolean {
+  if (usesIndicScript(`${title} ${artist}`)) {
+    return true;
+  }
+
+  return isIndianAnchor({ title, artist, albumName });
 }
 
 function dedupeSearchTracks(tracks: Track[]): Track[] {
@@ -399,7 +408,7 @@ export async function lookupTrack(
       match = await tryQuery(structuredQuery, primaryMarket);
     }
 
-    if (!match && usesIndicScript(`${title} ${artist}`)) {
+    if (!match && shouldUseIndianMarkets(title, artist)) {
       match = await tryQuery(simpleQuery, ["IN", "US"]);
 
       if (!match) {

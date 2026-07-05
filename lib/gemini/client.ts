@@ -297,9 +297,10 @@ async function callGeminiWithFallbacks(
 export async function getRecommendations(
   anchor: Anchor,
   axis: Axis,
+  options?: { strictScene?: boolean },
 ): Promise<RawRecommendation[]> {
   const apiKey = getApiKey();
-  const prompt = buildRecommendPrompt(anchor, axis);
+  const prompt = buildRecommendPrompt(anchor, axis, options);
 
   const data = await callGeminiWithFallbacks(apiKey, prompt, axis);
 

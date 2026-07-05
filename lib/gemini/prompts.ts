@@ -1,5 +1,13 @@
 import type { Axis, Anchor } from "@/lib/types";
 import { RECOMMENDATION_REQUEST_COUNT } from "@/lib/constants";
+import {
+  type AnchorScene,
+  detectAnchorScene,
+} from "@/lib/music/anchor-scene";
+
+export type RecommendPromptOptions = {
+  strictScene?: boolean;
+};
 
 const AXIS_INSTRUCTIONS: Record<
   Axis,
@@ -47,10 +55,6 @@ function sanitizeField(value: string): string {
   return value.replace(/[\r\n]+/g, " ").trim();
 }
 
-function usesIndicScript(value: string): boolean {
-  return /[\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0D00-\u0D7F]/.test(value);
-}
-
 function formatAnchorMetadata(anchor: Anchor): string {
   const lines = [
     `- Title (exact recording name, including any version tags): "${sanitizeField(anchor.title)}"`,
@@ -68,19 +72,36 @@ function formatAnchorMetadata(anchor: Anchor): string {
   return lines.join("\n");
 }
 
-function buildRegionalBlock(anchor: Anchor): string {
-  const text = `${anchor.title} ${anchor.artist}`;
-
-  if (!usesIndicScript(text)) {
+function buildRegionalBlock(
+  scene: AnchorScene | null,
+  axis: Axis,
+  recommendationCount: number,
+  strictScene = false,
+): string {
+  if (!scene) {
     return "";
   }
 
+  const languageRule =
+    scene.language === "indian"
+      ? "Recommend Indian film / pop songs in the same regional scene as the anchor (South Asian catalogs only)."
+      : `Every song MUST be in ${scene.label} — same language and music industry as the anchor.`;
+
+  const strictNote = strictScene
+    ? "\nSTRICT RETRY: Your previous list included Western English songs. That was wrong. This list must contain ONLY songs from the anchor's language scene."
+    : "";
+
   return `
-REGIONAL / NON-ENGLISH ANCHOR:
-- The anchor uses a non-Latin script (e.g. Tamil, Hindi, Telugu). Recommend songs in the SAME language and scene when possible.
-- Use exact Spotify track titles (native script preferred). Only romanize if you are unsure of the official spelling.
-- Include well-known tracks from that language's film/indie/pop catalogs — not generic Western substitutes.
-- Spread artists: do not recommend the same singer more than twice.`;
+LANGUAGE / SCENE LOCK (MANDATORY — highest priority):
+- The anchor is ${scene.label}.
+- ${languageRule}
+- Match the active axis (${axis}) ONLY within that language's catalogs — not with Western English substitutes.
+- ALL ${recommendationCount} recommendations must be real songs from that scene on Spotify.
+- Do NOT recommend English-language Western pop/rock/indie songs (e.g. no Radiohead, Sia, Jeff Buckley, Queen, Imagine Dragons) unless the anchor itself is Western English.
+- Use exact Spotify track titles (native script when applicable). Romanized spellings are fine when that is how Spotify lists them.
+- Prefer film soundtracks, playback singers, and composers from that industry. Spread artists — no singer more than twice.
+- If the anchor title uses a non-Latin script, keep recommendations in that script when possible.
+- Do not substitute songs from other Indian languages (e.g. no Hindi Bollywood picks for a Tamil anchor).${strictNote}`;
 }
 
 function buildBeatAxisBlock(anchor: Anchor): string {
@@ -124,12 +145,16 @@ Reason format for beat & energy:
 - Every "reason" must reference beat/energy and must NOT recommend songs that contradict the anchor's inferred tempo/energy.`;
 }
 
-function buildMoodAxisBlock(): string {
+function buildMoodAxisBlock(scene: AnchorScene | null): string {
+  const diversityRule = scene
+    ? "- Stay within the anchor's language/music industry. Emotional vibe must match using songs from that same scene — never swap in Western English equivalents."
+    : "- Vary eras and genres across the list — mood matches should feel surprising, not obvious playlist filler.";
+
   return `
 CRITICAL — mood & vibe matching rules:
 - Match emotional atmosphere only. A slow ballad anchor can match an upbeat song IF the feeling is the same (e.g. both defiant).
 - Do NOT recommend songs that merely share genre or tempo with the anchor.
-- Vary eras and genres across the list — mood matches should feel surprising, not obvious playlist filler.
+${diversityRule}
 - Each "reason" must name the specific emotion or vibe, not production details.`;
 }
 
@@ -141,13 +166,13 @@ CRITICAL — lyrical theme matching rules:
 - Each "reason" must cite the shared lyrical theme explicitly (love, loss, ambition, partying, etc.).`;
 }
 
-function buildAxisBlock(anchor: Anchor, axis: Axis): string {
+function buildAxisBlock(anchor: Anchor, axis: Axis, scene: AnchorScene | null): string {
   if (axis === "beat") {
     return buildBeatAxisBlock(anchor);
   }
 
   if (axis === "mood") {
-    return buildMoodAxisBlock();
+    return buildMoodAxisBlock(scene);
   }
 
   return buildLyricsAxisBlock();
@@ -165,12 +190,25 @@ export function getAxisTemperature(axis: Axis): number {
   return 0.88;
 }
 
-export function buildRecommendPrompt(anchor: Anchor, axis: Axis): string {
+export function buildRecommendPrompt(
+  anchor: Anchor,
+  axis: Axis,
+  options: RecommendPromptOptions = {},
+): string {
   const rules = AXIS_INSTRUCTIONS[axis];
   const axisLabel = AXIS_LABELS[axis];
   const metadataBlock = formatAnchorMetadata(anchor);
-  const axisBlock = buildAxisBlock(anchor, axis);
-  const regionalBlock = buildRegionalBlock(anchor);
+  const scene = detectAnchorScene(anchor);
+  const recommendationCount = scene
+    ? RECOMMENDATION_REQUEST_COUNT + 4
+    : RECOMMENDATION_REQUEST_COUNT;
+  const axisBlock = buildAxisBlock(anchor, axis, scene);
+  const regionalBlock = buildRegionalBlock(
+    scene,
+    axis,
+    recommendationCount,
+    options.strictScene,
+  );
 
   return `You are a music expert recommending real, existing songs.
 
@@ -184,9 +222,9 @@ ${regionalBlock}
 
 Similarity axis: ${axisLabel}
 
-Recommend exactly ${RECOMMENDATION_REQUEST_COUNT} real songs that exist on major streaming platforms (Spotify).
+Recommend exactly ${recommendationCount} real songs that exist on major streaming platforms (Spotify).
 
-Rank them by similarity on ${axisLabel} ONLY — strongest match first. Position 1 is the closest match; position ${RECOMMENDATION_REQUEST_COUNT} is the weakest but still relevant.
+Rank them by similarity on ${axisLabel} ONLY — strongest match first. Position 1 is the closest match; position ${recommendationCount} is the weakest but still relevant.
 
 For this axis:
 - ${rules.focus}

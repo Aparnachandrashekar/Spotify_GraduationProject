@@ -1,5 +1,9 @@
 import type { Anchor, RawRecommendation, Recommendation } from "@/lib/types";
 import {
+  detectAnchorScene,
+  isRecommendationMatchForScene,
+} from "@/lib/music/anchor-scene";
+import {
   RECOMMENDATION_DISPLAY_COUNT,
   RECOMMENDATION_REQUEST_COUNT,
 } from "@/lib/constants";
@@ -71,9 +75,11 @@ export async function enrichRecommendations(
   anchor: Anchor,
 ): Promise<{ recommendations: Recommendation[]; stats: EnrichmentStats }> {
   const anchorKey = normalizeSongKey(anchor.title, anchor.artist);
+  const scene = detectAnchorScene(anchor);
+  const rawLimit = scene ? RECOMMENDATION_REQUEST_COUNT + 8 : RECOMMENDATION_REQUEST_COUNT;
   const dedupedRaw = dedupeRawInOrder(rawRecommendations, anchorKey).slice(
     0,
-    RECOMMENDATION_REQUEST_COUNT,
+    rawLimit,
   );
 
   const seenSpotifyIds = new Set<string>();
@@ -89,6 +95,18 @@ export async function enrichRecommendations(
     lookups += 1;
 
     if (!recommendation) {
+      if (lookups < dedupedRaw.length) {
+        await sleep(ENRICH_LOOKUP_DELAY_MS);
+      }
+      continue;
+    }
+
+    if (
+      !isRecommendationMatchForScene(
+        { title: recommendation.title, artist: recommendation.artist },
+        scene,
+      )
+    ) {
       if (lookups < dedupedRaw.length) {
         await sleep(ENRICH_LOOKUP_DELAY_MS);
       }

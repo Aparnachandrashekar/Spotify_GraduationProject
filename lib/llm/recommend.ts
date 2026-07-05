@@ -7,6 +7,7 @@ import {
   assertGroqConfigured,
   getGroqRecommendations,
 } from "@/lib/groq/client";
+import { getRecommendationsWithSceneGuard } from "@/lib/llm/scene-filter";
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
 
 export { AllModelsQuotaError };
@@ -39,8 +40,8 @@ export async function getRecommendations(
   axis: Axis,
 ): Promise<RawRecommendation[]> {
   if (useGroq()) {
-    return getGroqRecommendations(anchor, axis);
+    return getRecommendationsWithSceneGuard(anchor, axis, getGroqRecommendations);
   }
 
-  return getGeminiRecommendations(anchor, axis);
+  return getRecommendationsWithSceneGuard(anchor, axis, getGeminiRecommendations);
 }

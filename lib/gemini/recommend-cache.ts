@@ -6,6 +6,7 @@ type CacheEntry = {
 };
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_VERSION = "scene-v6";
 const cache = new Map<string, CacheEntry>();
 
 function cacheKey(
@@ -13,7 +14,7 @@ function cacheKey(
   artist: string,
   axis: Axis,
 ): string {
-  return `${title.toLowerCase()}|${artist.toLowerCase()}|${axis}`;
+  return `${CACHE_VERSION}|${title.toLowerCase()}|${artist.toLowerCase()}|${axis}`;
 }
 
 export function getCachedRecommendations(
