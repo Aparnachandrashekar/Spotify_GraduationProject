@@ -9,54 +9,68 @@ import { ShellPlayerBar } from "./ShellPlayerBar";
 import { ShellSidebar } from "./ShellSidebar";
 import { ShellTopBar } from "./ShellTopBar";
 
-const PANEL_MS = 400;
-
 type SpotifyShellProps = {
   children?: React.ReactNode;
 };
 
 export function SpotifyShell({ children }: SpotifyShellProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarLayout, setSidebarLayout] = useState<"collapsed" | "expanded">(
-    "collapsed",
-  );
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarContentExpanded, setSidebarContentExpanded] = useState(false);
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const { nowPlaying } = usePlayback();
-  const sidebarTimerRef = useRef<number | null>(null);
+  const sidebarSlotRef = useRef<HTMLDivElement>(null);
+  const sidebarExpandedRef = useRef(sidebarExpanded);
 
-  const clearSidebarTimer = useCallback(() => {
-    if (sidebarTimerRef.current !== null) {
-      window.clearTimeout(sidebarTimerRef.current);
-      sidebarTimerRef.current = null;
-    }
-  }, []);
+  sidebarExpandedRef.current = sidebarExpanded;
 
   const toggleSidebar = useCallback(() => {
-    clearSidebarTimer();
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    if (sidebarOpen) {
-      // Switch to icon rail immediately so expanded content never squishes in a narrow column.
-      setSidebarLayout("collapsed");
-      setSidebarOpen(false);
+    if (sidebarExpanded) {
+      setSidebarContentExpanded(false);
+      setSidebarExpanded(false);
       return;
     }
 
-    setSidebarOpen(true);
-    sidebarTimerRef.current = window.setTimeout(() => {
-      setSidebarLayout("expanded");
-      sidebarTimerRef.current = null;
-    }, PANEL_MS);
-  }, [clearSidebarTimer, sidebarOpen]);
+    setSidebarExpanded(true);
 
-  useEffect(() => {
-    return () => clearSidebarTimer();
-  }, [clearSidebarTimer]);
-
-  useEffect(() => {
-    if (!sidebarOpen && sidebarLayout === "expanded") {
-      setSidebarLayout("collapsed");
+    if (reducedMotion) {
+      setSidebarContentExpanded(true);
+      return;
     }
-  }, [sidebarOpen, sidebarLayout]);
+
+    setSidebarContentExpanded(false);
+  }, [sidebarExpanded]);
+
+  useEffect(() => {
+    const slot = sidebarSlotRef.current;
+
+    if (!slot) {
+      return;
+    }
+
+    function handleTransitionEnd(event: TransitionEvent) {
+      if (event.target !== slot || event.propertyName !== "width") {
+        return;
+      }
+
+      setSidebarContentExpanded(sidebarExpandedRef.current);
+    }
+
+    slot.addEventListener("transitionend", handleTransitionEnd);
+
+    return () => {
+      slot.removeEventListener("transitionend", handleTransitionEnd);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarExpanded) {
+      setSidebarContentExpanded(false);
+    }
+  }, [sidebarExpanded]);
 
   useEffect(() => {
     if (nowPlaying) {
@@ -64,11 +78,11 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
     }
   }, [nowPlaying?.spotifyId, nowPlaying]);
 
-  const panelsCollapsed = !sidebarOpen && !nowPlayingOpen;
+  const panelsCollapsed = !sidebarExpanded && !nowPlayingOpen;
 
   const bodyClassName = [
     styles.body,
-    sidebarOpen ? styles.sidebarExpanded : styles.sidebarCollapsed,
+    sidebarExpanded ? styles.sidebarExpanded : styles.sidebarCollapsed,
     nowPlayingOpen ? styles.nowPlayingExpanded : styles.nowPlayingCollapsed,
   ].join(" ");
 
@@ -77,13 +91,9 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
       <ShellTopBar panelsCollapsed={panelsCollapsed} />
 
       <div className={bodyClassName}>
-        <div className={styles.sidebarSlot}>
+        <div ref={sidebarSlotRef} className={styles.sidebarSlot}>
           <ShellSidebar
-            layout={
-              sidebarOpen && sidebarLayout === "expanded"
-                ? "expanded"
-                : "collapsed"
-            }
+            layout={sidebarContentExpanded ? "expanded" : "collapsed"}
             onToggle={toggleSidebar}
           />
         </div>

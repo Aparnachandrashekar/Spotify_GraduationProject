@@ -1,7 +1,6 @@
 .sidebar {
-  width: 100%;
+  width: var(--shell-sidebar-expanded-width, 332px);
   height: 100%;
-  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -17,37 +16,54 @@
   border-radius: 8px;
   overflow: hidden;
   box-sizing: border-box;
+  transition: padding var(--panel-duration, 0.35s) ease;
 }
 
 .layoutCollapsed .panel {
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 14px 10px 16px;
 }
 
 .expandedOnly,
 .collapsedOnly {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .layoutExpanded .expandedHeader.expandedOnly {
   display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .layoutExpanded .expandedContent.expandedOnly {
   display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .layoutExpanded .meta.expandedOnly {
   display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .layoutCollapsed .expandedOnly {
   display: none;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .layoutCollapsed .collapsedOnly {
   display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .layoutCollapsed .collapsedHeader.collapsedOnly {
@@ -71,7 +87,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -191,7 +207,7 @@ button.collapsedIconBtn:hover {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   overflow-y: auto;
   min-height: 0;
   width: 100%;
@@ -199,41 +215,33 @@ button.collapsedIconBtn:hover {
 
 .layoutCollapsed .list {
   align-items: center;
-  gap: 16px;
-  width: 52px;
+  width: 48px;
 }
 
 .listItem {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
+  display: flex;
   align-items: center;
   gap: 14px;
-  padding: 8px;
+  padding: 0;
   border-radius: 4px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .layoutCollapsed .listItem {
-  display: block;
+  justify-content: center;
   width: 48px;
-  padding: 0;
 }
 
 .cover {
-  width: 52px;
-  height: 52px;
-  border-radius: 4px;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
-}
-
-.layoutCollapsed .cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
 }
 
 .coverLabel {
@@ -281,6 +289,7 @@ button.collapsedIconBtn:hover {
 .meta {
   min-width: 0;
   overflow: hidden;
+  flex: 1;
 }
 
 .name {
@@ -299,4 +308,10 @@ button.collapsedIconBtn:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
 }
