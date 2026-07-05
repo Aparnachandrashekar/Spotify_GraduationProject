@@ -1,3 +1,5 @@
+import type { InferredAnchorProfile } from "@/lib/music/anchor-inference";
+import type { TrackAudioProfile } from "@/lib/spotify/audio-features";
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
 import { AllModelsQuotaError } from "@/lib/gemini/client";
 import { filterAnchorAndDuplicates } from "@/lib/gemini/client";
@@ -80,7 +82,12 @@ function parseRetryAfterSeconds(headers: Headers): number {
 export async function getGroqRecommendations(
   anchor: Anchor,
   axis: Axis,
-  options?: { strictScene?: boolean },
+  options?: {
+    strictScene?: boolean;
+    audioProfile?: TrackAudioProfile | null;
+    anchorAssessment?: string | null;
+    inferredProfile?: InferredAnchorProfile | null;
+  },
 ): Promise<RawRecommendation[]> {
   const apiKey = getApiKey();
   const prompt = `${buildRecommendPrompt(anchor, axis, options)}
@@ -99,7 +106,7 @@ Return your answer as a JSON object with a single key "recommendations" whose va
         {
           role: "system",
           content:
-            "You are a precise music recommendation engine. Each request uses exactly one similarity axis (beat, mood, or lyrics). Lists for different axes must differ meaningfully. For Indian/Tamil/Hindi/Telugu anchors, recommend only songs from that same language and industry — never substitute Western English hits. Return valid JSON only.",
+            "You are a precise music recommendation engine. Each request uses exactly one similarity axis (beat, mood, or lyrics). When an anchor audio profile is provided, treat those numbers as ground truth. For Indian/Tamil/Hindi anchors, stay in that language scene but rank by axis fit first. Return valid JSON only.",
         },
         {
           role: "user",
@@ -107,7 +114,14 @@ Return your answer as a JSON object with a single key "recommendations" whose va
         },
       ],
       response_format: { type: "json_object" },
-      temperature: getAxisTemperature(axis),
+      temperature: getAxisTemperature(
+        axis,
+        Boolean(
+          options?.audioProfile ||
+            options?.anchorAssessment ||
+            options?.inferredProfile,
+        ),
+      ),
     }),
   });
 

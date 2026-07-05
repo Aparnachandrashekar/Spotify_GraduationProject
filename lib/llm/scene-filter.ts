@@ -3,6 +3,7 @@ import {
   filterRecommendationsForScene,
   detectAnchorScene,
 } from "@/lib/music/anchor-scene";
+import type { RecommendOptions } from "@/lib/llm/recommend";
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
 
 const MIN_SCENE_COUNT = Math.ceil(RECOMMENDATION_REQUEST_COUNT * 0.6);
@@ -10,16 +11,17 @@ const MIN_SCENE_COUNT = Math.ceil(RECOMMENDATION_REQUEST_COUNT * 0.6);
 type FetchRecommendations = (
   anchor: Anchor,
   axis: Axis,
-  options?: { strictScene?: boolean },
+  options?: RecommendOptions,
 ) => Promise<RawRecommendation[]>;
 
 export async function getRecommendationsWithSceneGuard(
   anchor: Anchor,
   axis: Axis,
   fetchRecommendations: FetchRecommendations,
+  baseOptions: RecommendOptions = {},
 ): Promise<RawRecommendation[]> {
   const scene = detectAnchorScene(anchor);
-  const initial = await fetchRecommendations(anchor, axis);
+  const initial = await fetchRecommendations(anchor, axis, baseOptions);
 
   if (!scene) {
     return initial;
@@ -31,7 +33,10 @@ export async function getRecommendationsWithSceneGuard(
     return filtered;
   }
 
-  const retry = await fetchRecommendations(anchor, axis, { strictScene: true });
+  const retry = await fetchRecommendations(anchor, axis, {
+    ...baseOptions,
+    strictScene: true,
+  });
   const retryFiltered = filterRecommendationsForScene(retry, scene);
 
   if (retryFiltered.length >= MIN_SCENE_COUNT) {

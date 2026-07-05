@@ -7,6 +7,9 @@ import {
   getCachedRecommendations,
   setCachedRecommendations,
 } from "@/lib/gemini/recommend-cache";
+import { rerankRecommendationsByInference } from "@/lib/recommendations/inference-rank";
+import { rerankRecommendationsByAudio } from "@/lib/recommendations/audio-rank";
+import { resolveAnchorAudioProfile } from "@/lib/spotify/anchor-profile";
 import { assertSpotifyConfigured } from "@/lib/spotify/auth";
 import { enrichRecommendations } from "@/lib/spotify/enrich";
 import { apiError } from "@/lib/api/response";
@@ -38,13 +41,19 @@ function isAnchor(value: unknown): value is RecommendRequestBody["anchor"] {
     record.releaseYear === null ||
     typeof record.releaseYear === "number";
 
+  const hasOptionalSpotifyId =
+    record.spotifyId === undefined ||
+    record.spotifyId === null ||
+    typeof record.spotifyId === "string";
+
   return (
     typeof record.title === "string" &&
     typeof record.artist === "string" &&
     record.title.trim().length > 0 &&
     record.artist.trim().length > 0 &&
     hasOptionalAlbum &&
-    hasOptionalYear
+    hasOptionalYear &&
+    hasOptionalSpotifyId
   );
 }
 
@@ -84,6 +93,10 @@ export async function POST(
       typeof record.anchor.releaseYear === "number"
         ? record.anchor.releaseYear
         : null,
+    spotifyId:
+      typeof record.anchor.spotifyId === "string"
+        ? record.anchor.spotifyId.trim()
+        : null,
   };
   const axis = record.axis;
 
@@ -91,9 +104,14 @@ export async function POST(
     assertLlmConfigured();
     assertSpotifyConfigured();
 
+    const { profile: audioProfile } = await resolveAnchorAudioProfile(anchor);
+
     const cached = getCachedRecommendations(anchor.title, anchor.artist, axis);
     const rawRecommendations =
-      cached ?? (await getRecommendations(anchor, axis));
+      cached ??
+      (await getRecommendations(anchor, axis, {
+        audioProfile,
+      }));
 
     if (!cached) {
       setCachedRecommendations(
@@ -109,11 +127,25 @@ export async function POST(
       anchor,
     );
 
+    const rankedByInference = rerankRecommendationsByInference(
+      recommendations,
+      anchor,
+      axis,
+    );
+
+    const rankedRecommendations = audioProfile
+      ? await rerankRecommendationsByAudio(
+          rankedByInference,
+          audioProfile,
+          axis,
+        )
+      : rankedByInference;
+
     console.info(
       `[recommend] "${anchor.title}" by ${anchor.artist} (${axis}): LLM returned ${stats.llmReturned}, ${stats.survivedLookup} survived Spotify lookup, ${stats.dropped} dropped`,
     );
 
-    return NextResponse.json({ axis, recommendations });
+    return NextResponse.json({ axis, recommendations: rankedRecommendations });
   } catch (error) {
     if (error instanceof AllModelsQuotaError) {
       return NextResponse.json(

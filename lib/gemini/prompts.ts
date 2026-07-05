@@ -1,12 +1,21 @@
 import type { Axis, Anchor } from "@/lib/types";
 import { RECOMMENDATION_REQUEST_COUNT } from "@/lib/constants";
 import {
+  buildInferredProfileBlock,
+  inferAnchorProfile,
+  type InferredAnchorProfile,
+} from "@/lib/music/anchor-inference";
+import type { TrackAudioProfile } from "@/lib/spotify/audio-features";
+import {
   type AnchorScene,
   detectAnchorScene,
 } from "@/lib/music/anchor-scene";
 
 export type RecommendPromptOptions = {
   strictScene?: boolean;
+  audioProfile?: TrackAudioProfile | null;
+  anchorAssessment?: string | null;
+  inferredProfile?: InferredAnchorProfile | null;
 };
 
 const AXIS_INSTRUCTIONS: Record<
@@ -55,6 +64,39 @@ function sanitizeField(value: string): string {
   return value.replace(/[\r\n]+/g, " ").trim();
 }
 
+function buildAnchorAssessmentBlock(assessment: string, axis: Axis): string {
+  return `
+EXPERT ANCHOR ANALYSIS (${axis} axis — ground truth, do not contradict):
+${assessment}
+
+Every recommendation must genuinely match this assessment on the active axis.`;
+}
+
+function buildAudioProfileBlock(profile: TrackAudioProfile, axis: Axis): string {
+  const energyLabel =
+    profile.energy < 0.35 ? "low" : profile.energy < 0.65 ? "moderate" : "high";
+  const valenceLabel =
+    profile.valence < 0.35
+      ? "melancholic"
+      : profile.valence < 0.65
+        ? "mixed"
+        : "uplifting";
+
+  if (axis === "beat") {
+    return `
+SPOTIFY AUDIO DATA (ground truth):
+- Tempo: ${Math.round(profile.tempo)} BPM | Energy: ${profile.energy.toFixed(2)} (${energyLabel})`;
+  }
+
+  if (axis === "mood") {
+    return `
+SPOTIFY AUDIO DATA (ground truth):
+- Valence: ${profile.valence.toFixed(2)} (${valenceLabel}) | Energy: ${profile.energy.toFixed(2)} (${energyLabel})`;
+  }
+
+  return "";
+}
+
 function formatAnchorMetadata(anchor: Anchor): string {
   const lines = [
     `- Title (exact recording name, including any version tags): "${sanitizeField(anchor.title)}"`,
@@ -92,16 +134,13 @@ function buildRegionalBlock(
     : "";
 
   return `
-LANGUAGE / SCENE LOCK (MANDATORY — highest priority):
+LANGUAGE CONSTRAINT (apply while matching the axis above):
 - The anchor is ${scene.label}.
 - ${languageRule}
-- Match the active axis (${axis}) ONLY within that language's catalogs — not with Western English substitutes.
-- ALL ${recommendationCount} recommendations must be real songs from that scene on Spotify.
-- Do NOT recommend English-language Western pop/rock/indie songs (e.g. no Radiohead, Sia, Jeff Buckley, Queen, Imagine Dragons) unless the anchor itself is Western English.
-- Use exact Spotify track titles (native script when applicable). Romanized spellings are fine when that is how Spotify lists them.
-- Prefer film soundtracks, playback singers, and composers from that industry. Spread artists — no singer more than twice.
-- If the anchor title uses a non-Latin script, keep recommendations in that script when possible.
-- Do not substitute songs from other Indian languages (e.g. no Hindi Bollywood picks for a Tamil anchor).${strictNote}`;
+- Candidates must be from that scene on Spotify — but rank by ${axis} fit first, language second.
+- Do NOT recommend English-language Western pop/rock/indie songs unless the anchor itself is Western English.
+- Use exact Spotify track titles (native script when applicable).
+- Do not substitute songs from other Indian languages (e.g. no Hindi picks for a Tamil anchor).${strictNote}`;
 }
 
 function buildBeatAxisBlock(anchor: Anchor): string {
@@ -158,12 +197,20 @@ ${diversityRule}
 - Each "reason" must name the specific emotion or vibe, not production details.`;
 }
 
-function buildLyricsAxisBlock(): string {
+function buildLyricsAxisBlock(scene: AnchorScene | null): string {
+  const regionalLyrics = scene
+    ? `
+- For ${scene.label} film/pop songs: infer the lyrical theme from the title's meaning, the film/album context, and song type (romantic ballad, heartbreak, celebration, devotion, street swagger, etc.).
+- Do NOT recommend songs only because they share the same composer or singer — the story/theme must align.
+- Ignore beat, tempo, and production entirely on this axis.`
+    : "";
+
   return `
 CRITICAL — lyrical theme matching rules:
+- First identify what the anchor song is ABOUT (love, loss, longing, rebellion, celebration, devotion, heartbreak, nostalgia, etc.).
 - Match subject matter, narrative arc, and themes. Production and tempo are irrelevant.
-- Include songs from different genres if the story/theme aligns.
-- Each "reason" must cite the shared lyrical theme explicitly (love, loss, ambition, partying, etc.).`;
+- Include songs from different sonic styles if the story/theme aligns.
+- Each "reason" must cite the shared lyrical theme explicitly.${regionalLyrics}`;
 }
 
 function buildAxisBlock(anchor: Anchor, axis: Axis, scene: AnchorScene | null): string {
@@ -175,19 +222,22 @@ function buildAxisBlock(anchor: Anchor, axis: Axis, scene: AnchorScene | null): 
     return buildMoodAxisBlock(scene);
   }
 
-  return buildLyricsAxisBlock();
+  return buildLyricsAxisBlock(scene);
 }
 
-export function getAxisTemperature(axis: Axis): number {
+export function getAxisTemperature(
+  axis: Axis,
+  hasGrounding: boolean,
+): number {
   if (axis === "beat") {
-    return 0.65;
+    return hasGrounding ? 0.38 : 0.55;
   }
 
   if (axis === "mood") {
-    return 0.82;
+    return hasGrounding ? 0.52 : 0.72;
   }
 
-  return 0.88;
+  return 0.75;
 }
 
 export function buildRecommendPrompt(
@@ -202,6 +252,18 @@ export function buildRecommendPrompt(
   const recommendationCount = scene
     ? RECOMMENDATION_REQUEST_COUNT + 4
     : RECOMMENDATION_REQUEST_COUNT;
+  const inferredProfile =
+    options.inferredProfile ??
+    (scene ? inferAnchorProfile(anchor) : null);
+  const inferredBlock = inferredProfile
+    ? buildInferredProfileBlock(inferredProfile, axis)
+    : "";
+  const assessmentBlock = options.anchorAssessment
+    ? buildAnchorAssessmentBlock(options.anchorAssessment, axis)
+    : "";
+  const audioProfileBlock = options.audioProfile
+    ? buildAudioProfileBlock(options.audioProfile, axis)
+    : "";
   const axisBlock = buildAxisBlock(anchor, axis, scene);
   const regionalBlock = buildRegionalBlock(
     scene,
@@ -217,6 +279,9 @@ This list must be tailored ONLY to ${axisLabel}. A different axis (beat, mood, o
 
 The user selected this exact anchor recording on Spotify:
 ${metadataBlock}
+${inferredBlock}
+${assessmentBlock}
+${audioProfileBlock}
 ${axisBlock}
 ${regionalBlock}
 

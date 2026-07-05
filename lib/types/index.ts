@@ -16,6 +16,7 @@ export type Anchor = {
   artist: string;
   albumName?: string | null;
   releaseYear?: number | null;
+  spotifyId?: string | null;
 };
 
 export type RawRecommendation = {

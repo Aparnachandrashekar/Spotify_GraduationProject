@@ -291,6 +291,7 @@ export function trackToAnchor(track: Track): Anchor {
     artist: track.artist,
     albumName: track.albumName,
     releaseYear: track.releaseYear,
+    spotifyId: track.id,
   };
 }
 

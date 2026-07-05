@@ -1,3 +1,5 @@
+import type { InferredAnchorProfile } from "@/lib/music/anchor-inference";
+import type { TrackAudioProfile } from "@/lib/spotify/audio-features";
 import type { Anchor, Axis, RawRecommendation } from "@/lib/types";
 import { normalizeSongKey } from "@/lib/recommendations/keys";
 import { buildRecommendPrompt, getAxisTemperature } from "./prompts";
@@ -185,6 +187,7 @@ async function callGeminiModel(
   prompt: string,
   model: string,
   axis: Axis,
+  hasAudioProfile: boolean,
 ): Promise<GeminiGenerateResponse> {
   let lastError = "Recommendations unavailable — try again.";
 
@@ -205,7 +208,7 @@ async function callGeminiModel(
           ],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: getAxisTemperature(axis),
+            temperature: getAxisTemperature(axis, hasAudioProfile),
           },
         }),
       },
@@ -253,13 +256,14 @@ async function callGeminiWithFallbacks(
   apiKey: string,
   prompt: string,
   axis: Axis,
+  hasAudioProfile: boolean,
 ): Promise<GeminiGenerateResponse> {
   const models = getModelChain();
   let lastQuotaError: ModelQuotaError | null = null;
 
   for (const model of models) {
     try {
-      return await callGeminiModel(apiKey, prompt, model, axis);
+      return await callGeminiModel(apiKey, prompt, model, axis, hasAudioProfile);
     } catch (error) {
       if (error instanceof ModelQuotaError) {
         lastQuotaError = error;
@@ -297,12 +301,26 @@ async function callGeminiWithFallbacks(
 export async function getRecommendations(
   anchor: Anchor,
   axis: Axis,
-  options?: { strictScene?: boolean },
+  options?: {
+    strictScene?: boolean;
+    audioProfile?: TrackAudioProfile | null;
+    anchorAssessment?: string | null;
+    inferredProfile?: InferredAnchorProfile | null;
+  },
 ): Promise<RawRecommendation[]> {
   const apiKey = getApiKey();
   const prompt = buildRecommendPrompt(anchor, axis, options);
 
-  const data = await callGeminiWithFallbacks(apiKey, prompt, axis);
+  const data = await callGeminiWithFallbacks(
+    apiKey,
+    prompt,
+    axis,
+    Boolean(
+      options?.audioProfile ||
+        options?.anchorAssessment ||
+        options?.inferredProfile,
+    ),
+  );
 
   const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
