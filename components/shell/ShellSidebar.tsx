@@ -82,91 +82,75 @@ export function ShellSidebar({ expanded, onToggle }: ShellSidebarProps) {
       aria-hidden="true"
     >
       <div className={styles.panel}>
-        {expanded ? (
-          <>
-            <div className={styles.header}>
-              <h2 className={styles.title}>Your library</h2>
-              <div className={styles.headerActions}>
-                <span className={styles.headerIcon}>
-                  <PlusCircleIcon size={RAIL_ICON} />
-                </span>
-                <button
-                  type="button"
-                  className={styles.headerIconButton}
-                  aria-label="Collapse library"
-                  onClick={onToggle}
-                >
-                  <PanelCollapseLeftIcon size={RAIL_ICON} />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.expandedContent}>
-              <div className={styles.filters}>
-                {FILTER_PILLS.map((pill) => (
-                  <span key={pill} className={styles.filterPill}>
-                    {pill}
-                  </span>
-                ))}
-              </div>
-
-              <div className={styles.recentsRow}>
-                <span className={styles.recentsSearch}>
-                  <SearchIcon size={RAIL_ICON} />
-                </span>
-                <span className={styles.recentsLabel}>Recents</span>
-              </div>
-            </div>
-
-            <ul className={styles.list}>
-              {LIBRARY_ITEMS.map((item) => (
-                <li key={item.id} className={styles.listItem}>
-                  <div className={`${styles.cover} ${item.coverClass}`}>
-                    {item.coverLabel ? (
-                      <span className={styles.coverLabel}>{item.coverLabel}</span>
-                    ) : null}
-                  </div>
-                  <div className={styles.meta}>
-                    <p className={styles.name}>{item.name}</p>
-                    <p className={styles.subtitle}>{item.subtitle}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : (
-          <>
-            <div className={styles.collapsedHeader}>
+        <div className={styles.headerArea}>
+          <div className={`${styles.expandedHeader} ${styles.expandedOnly}`}>
+            <h2 className={styles.title}>Your library</h2>
+            <div className={styles.headerActions}>
+              <span className={styles.headerIcon}>
+                <PlusCircleIcon size={RAIL_ICON} />
+              </span>
               <button
                 type="button"
-                className={styles.collapsedIconBtn}
-                aria-label="Expand library"
+                className={styles.headerIconButton}
+                aria-label="Collapse library"
                 onClick={onToggle}
               >
                 <PanelCollapseLeftIcon size={RAIL_ICON} />
               </button>
-              <span className={styles.collapsedIconBtn}>
-                <PlusCircleIcon size={RAIL_ICON} />
-              </span>
             </div>
+          </div>
 
-            <ul className={styles.collapsedList}>
-              {LIBRARY_ITEMS.map((item) => (
-                <li
-                  key={item.id}
-                  className={styles.collapsedListItem}
-                  title={item.name}
-                >
-                  <div className={`${styles.coverCompact} ${item.coverClass}`}>
-                    {item.coverLabel ? (
-                      <span className={styles.coverLabel}>{item.coverLabel}</span>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+          <div className={`${styles.collapsedHeader} ${styles.collapsedOnly}`}>
+            <button
+              type="button"
+              className={styles.collapsedIconBtn}
+              aria-label="Expand library"
+              onClick={onToggle}
+            >
+              <PanelCollapseLeftIcon size={RAIL_ICON} />
+            </button>
+            <span className={styles.collapsedIconBtn}>
+              <PlusCircleIcon size={RAIL_ICON} />
+            </span>
+          </div>
+        </div>
+
+        <div className={`${styles.expandedContent} ${styles.expandedOnly}`}>
+          <div className={styles.filters}>
+            {FILTER_PILLS.map((pill) => (
+              <span key={pill} className={styles.filterPill}>
+                {pill}
+              </span>
+            ))}
+          </div>
+
+          <div className={styles.recentsRow}>
+            <span className={styles.recentsSearch}>
+              <SearchIcon size={RAIL_ICON} />
+            </span>
+            <span className={styles.recentsLabel}>Recents</span>
+          </div>
+        </div>
+
+        <ul className={styles.list}>
+          {LIBRARY_ITEMS.map((item) => (
+            <li
+              key={item.id}
+              className={styles.listItem}
+              title={expanded ? undefined : item.name}
+            >
+              <div className={`${styles.cover} ${item.coverClass}`}>
+                {item.coverLabel ? (
+                  <span className={styles.coverLabel}>{item.coverLabel}</span>
+                ) : null}
+              </div>
+              <div className={`${styles.meta} ${styles.expandedOnly}`}>
+                <p className={styles.name}>{item.name}</p>
+                <p className={styles.subtitle}>{item.subtitle}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </aside>
   );

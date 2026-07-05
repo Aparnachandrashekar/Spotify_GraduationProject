@@ -16,26 +16,48 @@
 
 .collapsed .panel {
   align-items: center;
-  gap: 10px;
-  padding: 10px 8px 12px;
+  gap: 12px;
+  padding: 12px 8px 14px;
 }
 
-.header {
+.expandedOnly,
+.collapsedOnly {
+  display: none;
+}
+
+.expanded .expandedOnly {
+  display: block;
+}
+
+.expanded .expandedHeader.expandedOnly {
   display: flex;
+}
+
+.collapsed .collapsedOnly {
+  display: flex;
+}
+
+.collapsed .collapsedHeader.collapsedOnly {
+  flex-direction: column;
+}
+
+.headerArea {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.expandedHeader {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   padding: 0 4px;
   min-height: 28px;
-  flex-shrink: 0;
 }
 
 .collapsedHeader {
-  display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 14px;
   width: 100%;
 }
 
@@ -162,6 +184,11 @@ button.collapsedIconBtn:hover {
   width: 100%;
 }
 
+.collapsed .list {
+  align-items: center;
+  gap: 14px;
+}
+
 .listItem {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
@@ -171,24 +198,11 @@ button.collapsedIconBtn:hover {
   border-radius: 4px;
 }
 
-.collapsedList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.collapsed .listItem {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.collapsedListItem {
-  margin: 0;
+  justify-content: center;
   padding: 0;
-  flex-shrink: 0;
+  width: 48px;
 }
 
 .cover {
@@ -202,15 +216,10 @@ button.collapsedIconBtn:hover {
   overflow: hidden;
 }
 
-.coverCompact {
+.collapsed .cover {
   width: 48px;
   height: 48px;
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
 }
 
 .coverLabel {

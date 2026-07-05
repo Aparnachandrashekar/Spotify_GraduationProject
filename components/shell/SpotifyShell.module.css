@@ -12,8 +12,8 @@
   --shell-sidebar-width: 332px;
   --shell-sidebar-collapsed-width: 76px;
   --shell-now-playing-width: 340px;
-  --panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --panel-duration: 0.55s;
+  --panel-ease: ease-in-out;
+  --panel-duration: 0.4s;
 
   display: grid;
   grid-template-rows: var(--shell-topbar-height) 1fr var(--shell-player-height);
@@ -62,7 +62,6 @@
   background: var(--shell-bg);
   border-radius: 8px;
   scrollbar-gutter: stable;
-  transition: border-radius var(--panel-duration) var(--panel-ease);
 }
 
 .center::-webkit-scrollbar {
@@ -80,16 +79,12 @@
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(12px);
-  transition:
-    opacity 0.45s var(--panel-ease) 0.06s,
-    transform 0.55s var(--panel-ease) 0.04s;
+  transition: opacity var(--panel-duration) var(--panel-ease);
 }
 
 .nowPlayingExpanded .nowPlayingSlot {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(0);
 }
 
 .nowPlayingExpandTab {
@@ -108,12 +103,10 @@
   border: none;
   cursor: pointer;
   opacity: 1;
-  transform: scale(1);
   transition:
-    opacity 0.4s var(--panel-ease),
-    transform 0.45s var(--panel-ease),
-    background-color 0.25s ease-out,
-    color 0.25s ease-out;
+    opacity var(--panel-duration) var(--panel-ease),
+    background-color 0.2s ease-out,
+    color 0.2s ease-out;
 }
 
 .nowPlayingExpandTab:hover {
@@ -124,7 +117,6 @@
 .nowPlayingExpandTabHidden {
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.88);
 }
 
 @media (prefers-reduced-motion: reduce) {

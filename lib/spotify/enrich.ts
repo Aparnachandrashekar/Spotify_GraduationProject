@@ -1,10 +1,12 @@
 import type { Anchor, RawRecommendation, Recommendation } from "@/lib/types";
-import { RECOMMENDATION_DISPLAY_COUNT } from "@/lib/constants";
+import {
+  RECOMMENDATION_DISPLAY_COUNT,
+  RECOMMENDATION_REQUEST_COUNT,
+} from "@/lib/constants";
 import { normalizeSongKey } from "@/lib/recommendations/keys";
 import { lookupTrack } from "./search";
 
-const ENRICH_CONCURRENCY = 2;
-const ENRICH_LOOKUP_DELAY_MS = 120;
+const ENRICH_LOOKUP_DELAY_MS = 100;
 
 export type EnrichmentStats = {
   llmReturned: number;
@@ -33,36 +35,10 @@ function dedupeRawInOrder(
   return deduped;
 }
 
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  concurrency: number,
-  mapper: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(items.length);
-  let nextIndex = 0;
-
-  async function worker(): Promise<void> {
-    while (nextIndex < items.length) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
-
-      if (currentIndex < items.length - 1) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, ENRICH_LOOKUP_DELAY_MS);
-        });
-      }
-    }
-  }
-
-  const workers = Array.from(
-    { length: Math.min(concurrency, items.length) },
-    () => worker(),
-  );
-
-  await Promise.all(workers);
-
-  return results;
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function enrichRecommendation(
@@ -95,32 +71,34 @@ export async function enrichRecommendations(
   anchor: Anchor,
 ): Promise<{ recommendations: Recommendation[]; stats: EnrichmentStats }> {
   const anchorKey = normalizeSongKey(anchor.title, anchor.artist);
-  const dedupedRaw = dedupeRawInOrder(rawRecommendations, anchorKey);
-
-  const indexedResults = await mapWithConcurrency(
-    dedupedRaw,
-    ENRICH_CONCURRENCY,
-    async (raw, index) => ({
-      index,
-      recommendation: await enrichRecommendation(raw),
-    }),
+  const dedupedRaw = dedupeRawInOrder(rawRecommendations, anchorKey).slice(
+    0,
+    RECOMMENDATION_REQUEST_COUNT,
   );
-
-  indexedResults.sort((a, b) => a.index - b.index);
 
   const seenSpotifyIds = new Set<string>();
   const recommendations: Recommendation[] = [];
+  let lookups = 0;
 
-  for (const { recommendation } of indexedResults) {
+  for (const raw of dedupedRaw) {
     if (recommendations.length >= RECOMMENDATION_DISPLAY_COUNT) {
       break;
     }
 
+    const recommendation = await enrichRecommendation(raw);
+    lookups += 1;
+
     if (!recommendation) {
+      if (lookups < dedupedRaw.length) {
+        await sleep(ENRICH_LOOKUP_DELAY_MS);
+      }
       continue;
     }
 
     if (seenSpotifyIds.has(recommendation.spotifyId)) {
+      if (lookups < dedupedRaw.length) {
+        await sleep(ENRICH_LOOKUP_DELAY_MS);
+      }
       continue;
     }
 
@@ -130,6 +108,9 @@ export async function enrichRecommendations(
     );
 
     if (resolvedKey === anchorKey) {
+      if (lookups < dedupedRaw.length) {
+        await sleep(ENRICH_LOOKUP_DELAY_MS);
+      }
       continue;
     }
 
@@ -138,7 +119,18 @@ export async function enrichRecommendations(
       ...recommendation,
       rank: recommendations.length + 1,
     });
+
+    if (
+      recommendations.length < RECOMMENDATION_DISPLAY_COUNT &&
+      lookups < dedupedRaw.length
+    ) {
+      await sleep(ENRICH_LOOKUP_DELAY_MS);
+    }
   }
+
+  console.info(
+    `[spotify] enrich done: ${lookups} lookups, ${recommendations.length} results`,
+  );
 
   const stats: EnrichmentStats = {
     llmReturned: rawRecommendations.length,
