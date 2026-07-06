@@ -180,49 +180,61 @@
   }
 }
 
-/* ── Mobile: single-column stack ── */
+/* ── Mobile: compact stack, ranks visible sooner ── */
 @media (max-width: 768px) {
   .discovery {
-    gap: 28px;
-  }
-
-  .columns {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
-  .leftColumn {
-    position: static;
-  }
-
-  .pageTitle {
-    font-size: 26px;
+    gap: 14px;
   }
 
   .pageHeader {
     padding-right: 0;
+    gap: 0;
+  }
+
+  .pageTitle,
+  .pageSubtitle {
+    display: none;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .leftColumn {
+    position: static;
+    gap: 10px;
+  }
+
+  .rightColumn {
+    gap: 12px;
+  }
+
+  .resultsHeader {
+    margin-bottom: 10px;
+    gap: 4px;
+  }
+
+  .resultsArea {
+    min-height: 0;
   }
 
   .playHint {
+    display: none;
+  }
+
+  .savedStrip {
     display: none;
   }
 }
 
 @media (max-width: 480px) {
   .discovery {
-    gap: 22px;
-  }
-
-  .pageTitle {
-    font-size: 22px;
-  }
-
-  .pageSubtitle {
-    font-size: 13px;
+    gap: 12px;
   }
 
   .columns {
-    gap: 22px;
+    gap: 12px;
   }
 
   .changeSong {

@@ -212,48 +212,63 @@
 
 @media (max-width: 768px) {
   .screen {
-    padding: 16px 12px 28px;
-    gap: 20px;
+    padding: 10px 16px 16px;
+    gap: 12px;
   }
 
   .landing {
-    align-items: flex-start;
-    padding: 16px 0 32px;
-  }
-
-  .landingColumn {
-    gap: 32px;
-  }
-
-  .landingHeader {
-    gap: 18px;
-  }
-
-  .landingTitle {
-    font-size: clamp(32px, 9vw, 44px);
-    max-width: none;
-  }
-
-  .landingCompact {
+    align-items: stretch;
+    justify-content: flex-start;
     padding: 4px 0 16px;
   }
 
+  .landingColumn {
+    align-items: stretch;
+    gap: 20px;
+    max-width: none;
+    margin: 0;
+    text-align: left;
+  }
+
+  .landingHeader {
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .landingTitle {
+    font-size: 26px;
+    max-width: none;
+    line-height: 1.12;
+  }
+
+  .landingLead {
+    display: none;
+  }
+
+  .landingCompact {
+    padding: 0 0 12px;
+  }
+
   .landingColumnCompact {
-    gap: 14px;
+    gap: 12px;
   }
 
   .landingHeaderCompact .landingTitle {
-    font-size: 20px;
+    font-size: 18px;
   }
 }
 
 @media (max-width: 480px) {
   .screen {
-    padding: 12px 10px 24px;
-    gap: 16px;
+    padding: 8px 14px 14px;
+    gap: 10px;
   }
 
   .landingTitle {
-    font-size: clamp(28px, 8.5vw, 36px);
+    font-size: 22px;
+  }
+
+  .landingHeaderCompact .landingTitle {
+    font-size: 16px;
   }
 }

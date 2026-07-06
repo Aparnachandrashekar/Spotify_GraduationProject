@@ -85,12 +85,17 @@
 
 @media (max-width: 768px) {
   .wrapper {
-    padding: 16px;
+    gap: 0;
+    padding: 10px;
+  }
+
+  .description {
+    display: none;
   }
 
   .segment {
     font-size: 12px;
-    padding: 12px 8px;
+    padding: 11px 6px;
   }
 }
 

@@ -248,29 +248,64 @@
 
 @media (max-width: 768px) {
   .row {
-    grid-template-columns: 52px 36px 48px minmax(0, 1fr) 36px;
-    padding: 14px 12px;
-    gap: 12px;
+    grid-template-columns: 32px 44px minmax(0, 1fr) 36px;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .rankLabel {
+    display: none;
   }
 
   .rankNumber {
-    font-size: 26px;
+    font-size: 20px;
+  }
+
+  .playControl {
+    display: none;
   }
 
   .title {
     font-size: 15px;
   }
+
+  .artist {
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .reason {
+    font-size: 13px;
+    margin-top: 6px;
+    -webkit-line-clamp: 2;
+  }
+
+  .artButton img,
+  .artButton > div {
+    width: 44px !important;
+    height: 44px !important;
+  }
 }
 
 @container results (max-width: 560px) {
   .row {
-    grid-template-columns: 36px 32px 40px minmax(0, 1fr) 32px;
+    grid-template-columns: 32px 40px minmax(0, 1fr) 32px;
+    align-items: center;
     gap: 10px;
-    padding: 12px;
+    padding: 10px 12px;
+  }
+
+  .rankLabel {
+    display: none;
   }
 
   .rankNumber {
-    font-size: 22px;
+    font-size: 20px;
+  }
+
+  .playControl {
+    display: none;
   }
 
   .title {
@@ -284,25 +319,16 @@
 
 @media (max-width: 480px) {
   .row {
-    grid-template-columns: 36px 40px minmax(0, 1fr) 32px;
+    grid-template-columns: 28px 40px minmax(0, 1fr) 32px;
     gap: 8px;
-    padding: 10px;
-  }
-
-  .rankCell {
-    display: none;
+    padding: 8px 10px;
   }
 
   .rankNumber {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .title {
     font-size: 14px;
-  }
-
-  .reason {
-    font-size: 13px;
-    -webkit-line-clamp: 2;
   }
 }
