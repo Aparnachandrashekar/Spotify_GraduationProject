@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MobileShellContext,
+  type MobileTab,
+} from "@/hooks/useMobileShell";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePlayback } from "@/hooks/usePlayback";
 import styles from "./SpotifyShell.module.css";
-import { PanelExpandRightIcon } from "./ShellIcons";
+import mobileViewStyles from "./ShellMobileViews.module.css";
+import { PanelExpandRightIcon, PlusCircleIcon } from "./ShellIcons";
+import { ShellMobileTabBar } from "./ShellMobileTabBar";
 import { ShellNowPlaying } from "./ShellNowPlaying";
 import { ShellPlayerBar } from "./ShellPlayerBar";
 import { ShellSidebar } from "./ShellSidebar";
@@ -18,6 +24,7 @@ type SpotifyShellProps = {
 
 export function SpotifyShell({ children }: SpotifyShellProps) {
   const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<MobileTab>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarContentExpanded, setSidebarContentExpanded] = useState(false);
   const [sidebarRevealed, setSidebarRevealed] = useState(false);
@@ -65,11 +72,6 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
     setSidebarContentExpanded(false);
     setSidebarOpen(true);
 
-    if (isMobile) {
-      finishSidebarOpen();
-      return;
-    }
-
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -83,7 +85,7 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
       sidebarTimerRef.current = null;
       finishSidebarOpen();
     }, SIDEBAR_ANIM_MS);
-  }, [clearSidebarTimer, closeSidebar, finishSidebarOpen, isMobile, sidebarOpen]);
+  }, [clearSidebarTimer, closeSidebar, finishSidebarOpen, sidebarOpen]);
 
   useEffect(() => {
     if (isMobile) {
@@ -124,19 +126,6 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
     }
   }, [nowPlaying?.spotifyId, nowPlaying]);
 
-  useEffect(() => {
-    if (!isMobile || !sidebarOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isMobile, sidebarOpen]);
-
   const panelsCollapsed = !sidebarOpen && !nowPlayingOpen;
 
   const bodyClassName = [
@@ -145,57 +134,96 @@ export function SpotifyShell({ children }: SpotifyShellProps) {
     nowPlayingOpen ? styles.nowPlayingExpanded : styles.nowPlayingCollapsed,
   ].join(" ");
 
+  const mobileContextValue = useMemo(
+    () => ({
+      activeTab: mobileTab,
+      setActiveTab: setMobileTab,
+      isMobile,
+    }),
+    [isMobile, mobileTab],
+  );
+
+  function renderMobileMain() {
+    if (mobileTab === "library") {
+      return (
+        <div className={mobileViewStyles.mobileLibrary}>
+          <div className={mobileViewStyles.mobileLibraryBody}>
+            <ShellSidebar
+              layout="expanded"
+              revealed
+              hideToggle
+              onToggle={() => {}}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (mobileTab === "create") {
+      return (
+        <div className={mobileViewStyles.mobileCreate}>
+          <PlusCircleIcon size={48} />
+          <p className={mobileViewStyles.mobileCreateTitle}>
+            Create something new
+          </p>
+          <p className={mobileViewStyles.mobileCreateHint}>
+            Build a playlist, blend songs, or start a Jam — coming soon in
+            Axis.
+          </p>
+        </div>
+      );
+    }
+
+    return children;
+  }
+
   return (
-    <div className={styles.shell} aria-label="Spotify shell">
-      <ShellTopBar
-        panelsCollapsed={panelsCollapsed}
-        onOpenLibrary={toggleSidebar}
-        libraryOpen={sidebarOpen}
-      />
+    <MobileShellContext.Provider value={mobileContextValue}>
+      <div className={styles.shell} aria-label="Spotify shell">
+        <ShellTopBar panelsCollapsed={panelsCollapsed} />
 
-      {isMobile && sidebarOpen ? (
-        <button
-          type="button"
-          className={styles.mobileBackdrop}
-          aria-label="Close library"
-          onClick={closeSidebar}
-        />
-      ) : null}
+        <div className={bodyClassName}>
+          <div ref={sidebarSlotRef} className={styles.sidebarSlot}>
+            <ShellSidebar
+              layout={sidebarContentExpanded ? "expanded" : "collapsed"}
+              revealed={sidebarRevealed}
+              onToggle={toggleSidebar}
+            />
+          </div>
 
-      <div className={bodyClassName}>
-        <div ref={sidebarSlotRef} className={styles.sidebarSlot}>
-          <ShellSidebar
-            layout={sidebarContentExpanded ? "expanded" : "collapsed"}
-            revealed={sidebarRevealed}
-            onToggle={toggleSidebar}
+          <div className={styles.centerWrap}>
+            <main className={styles.center} aria-label="Main content">
+              {isMobile ? renderMobileMain() : children}
+            </main>
+
+            {!isMobile ? (
+              <button
+                type="button"
+                className={`${styles.nowPlayingExpandTab} ${nowPlayingOpen ? styles.nowPlayingExpandTabHidden : ""}`}
+                aria-label="Show now playing panel"
+                aria-hidden={nowPlayingOpen}
+                tabIndex={nowPlayingOpen ? -1 : 0}
+                onClick={() => setNowPlayingOpen(true)}
+              >
+                <PanelExpandRightIcon size={26} />
+              </button>
+            ) : null}
+          </div>
+
+          <div className={styles.nowPlayingSlot}>
+            <ShellNowPlaying onCollapse={() => setNowPlayingOpen(false)} />
+          </div>
+        </div>
+
+        <ShellPlayerBar />
+
+        {isMobile ? (
+          <ShellMobileTabBar
+            activeTab={mobileTab}
+            onTabChange={setMobileTab}
           />
-        </div>
-
-        <div className={styles.centerWrap}>
-          <main className={styles.center} aria-label="Main content">
-            {children}
-          </main>
-
-          <button
-            type="button"
-            className={`${styles.nowPlayingExpandTab} ${nowPlayingOpen ? styles.nowPlayingExpandTabHidden : ""}`}
-            aria-label="Show now playing panel"
-            aria-hidden={nowPlayingOpen}
-            tabIndex={nowPlayingOpen ? -1 : 0}
-            onClick={() => setNowPlayingOpen(true)}
-          >
-            <PanelExpandRightIcon size={26} />
-          </button>
-        </div>
-
-        <div className={styles.nowPlayingSlot}>
-          <ShellNowPlaying
-            onCollapse={() => setNowPlayingOpen(false)}
-          />
-        </div>
+        ) : null}
       </div>
-
-      <ShellPlayerBar />
-    </div>
+    </MobileShellContext.Provider>
   );
 }

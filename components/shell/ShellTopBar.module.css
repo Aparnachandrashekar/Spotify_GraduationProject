@@ -140,26 +140,6 @@
     height: 44px;
   }
 
-  .mobileLibraryBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border: none;
-    border-radius: 50%;
-    background: #282828;
-    color: #ffffff;
-    cursor: pointer;
-    padding: 0;
-  }
-
-  .mobileLibraryBtnActive {
-    background: #333333;
-    color: #1db954;
-  }
-
   .searchCluster {
     display: none;
   }

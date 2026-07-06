@@ -1,0 +1,45 @@
+.tabBar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .tabBar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding: 6px 8px env(safe-area-inset-bottom, 0px);
+    background: #000000;
+    border-top: 1px solid #282828;
+  }
+
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    color: #b3b3b3;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .tabActive {
+    color: #ffffff;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.1;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

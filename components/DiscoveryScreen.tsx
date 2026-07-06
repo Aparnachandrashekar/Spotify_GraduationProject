@@ -10,11 +10,13 @@ import { usePlayback } from "@/hooks/usePlayback";
 import { getFriendlyErrorMessage } from "@/lib/errors";
 import { DEFAULT_AXIS, SEARCH_DEBOUNCE_MS, SEARCH_MIN_LENGTH, SEARCH_TIMEOUT_MS } from "@/lib/constants";
 import type { ApiErrorResponse, Axis, SearchResponse, Track } from "@/lib/types";
+import { useMobileShell } from "@/hooks/useMobileShell";
 import { useEffect, useRef, useState } from "react";
 import styles from "./DiscoveryScreen.module.css";
 
 export function DiscoveryScreen() {
   const { clearPlaying } = usePlayback();
+  const { activeTab, isMobile } = useMobileShell();
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [anchor, setAnchor] = useState<Track | null>(null);
@@ -168,6 +170,16 @@ export function DiscoveryScreen() {
   }
 
   const isSearchActive = query.length > 0;
+
+  useEffect(() => {
+    if (!isMobile || activeTab !== "search") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("axis-search")?.focus();
+    });
+  }, [activeTab, isMobile]);
 
   return (
     <div className={styles.screen}>

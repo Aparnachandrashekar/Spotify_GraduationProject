@@ -73,12 +73,14 @@ const RAIL_ICON = 26;
 type ShellSidebarProps = {
   layout: "collapsed" | "expanded";
   revealed?: boolean;
+  hideToggle?: boolean;
   onToggle: () => void;
 };
 
 export function ShellSidebar({
   layout,
   revealed = false,
+  hideToggle = false,
   onToggle,
 }: ShellSidebarProps) {
   const expanded = layout === "expanded";
@@ -102,14 +104,16 @@ export function ShellSidebar({
               <span className={styles.headerIcon}>
                 <PlusCircleIcon size={RAIL_ICON} />
               </span>
-              <button
-                type="button"
-                className={styles.headerIconButton}
-                aria-label="Collapse library"
-                onClick={onToggle}
-              >
-                <PanelCollapseLeftIcon size={RAIL_ICON} />
-              </button>
+              {hideToggle ? null : (
+                <button
+                  type="button"
+                  className={styles.headerIconButton}
+                  aria-label="Collapse library"
+                  onClick={onToggle}
+                >
+                  <PanelCollapseLeftIcon size={RAIL_ICON} />
+                </button>
+              )}
             </div>
           </div>
 
